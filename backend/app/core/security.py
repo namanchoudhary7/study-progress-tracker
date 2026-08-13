@@ -33,5 +33,9 @@ def create_refresh_token(user_id: int) -> str:
     return _create_token(user_id, "refresh", timedelta(days=settings.refresh_token_expire_days))
 
 
+def create_email_verification_token(user_id: int) -> str:
+    return _create_token(user_id, "email_verify", timedelta(hours=24))
+
+
 def decode_token(token: str) -> dict:
     return jwt.decode(token, settings.jwt_secret, algorithms=[settings.jwt_algorithm])

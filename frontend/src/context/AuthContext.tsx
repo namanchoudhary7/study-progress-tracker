@@ -10,13 +10,15 @@ interface AuthContextValue {
   login: (identifier: string, password: string) => Promise<AuthUser>;
   signup: (email: string, username: string, password: string) => Promise<AuthUser>;
   logout: () => Promise<void>;
+  resendVerification: () => Promise<void>;
   loginError: string | null;
   signupError: string | null;
+  resendVerificationError: string | null;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-const ME_KEY = ["auth", "me"];
+export const ME_KEY = ["auth", "me"];
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const qc = useQueryClient();
@@ -68,6 +70,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
   });
 
+  const resendVerificationMutation = useMutation({
+    mutationFn: authApi.resendVerification,
+  });
+
   const value: AuthContextValue = {
     user: meQuery.data ?? (meQuery.isError ? null : undefined),
     isLoading: meQuery.isLoading,
@@ -75,8 +81,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     login: (identifier, password) => loginMutation.mutateAsync({ identifier, password }),
     signup: (email, username, password) => signupMutation.mutateAsync({ email, username, password }),
     logout: () => logoutMutation.mutateAsync(),
+    resendVerification: () => resendVerificationMutation.mutateAsync(),
     loginError: loginMutation.error ? loginMutation.error.message : null,
     signupError: signupMutation.error ? signupMutation.error.message : null,
+    resendVerificationError: resendVerificationMutation.error ? resendVerificationMutation.error.message : null,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

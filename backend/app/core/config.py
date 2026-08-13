@@ -18,6 +18,9 @@ class Settings(BaseSettings):
     google_redirect_uri: str = "http://localhost:8000/api/v1/auth/google/callback"
     frontend_url: str = "http://localhost:5173"
 
+    resend_api_key: str = ""
+    email_from: str = "Study Tracker <onboarding@resend.dev>"
+
     @property
     def cors_origins_list(self) -> list[str]:
         return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]

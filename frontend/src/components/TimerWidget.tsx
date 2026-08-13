@@ -44,7 +44,13 @@ export function TimerWidget() {
         ) : (
           <>
             <span className="flex-1 text-sm text-neutral-500">No timer running</span>
-            <Button size="sm" variant="primary" icon={Play} onClick={() => setPickerOpen(true)}>
+            <Button
+              size="md"
+              variant="primary"
+              icon={Play}
+              className="px-5 py-2.5 text-base"
+              onClick={() => setPickerOpen(true)}
+            >
               Start timer
             </Button>
           </>

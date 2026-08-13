@@ -1,11 +1,26 @@
 import { useState } from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
-import { BookOpen, Clock, Download, LayoutDashboard, LogOut, Menu, Moon, RotateCcw, Sun, Target, Monitor } from "lucide-react";
+import {
+  BookOpen,
+  Clock,
+  Download,
+  LayoutDashboard,
+  LogOut,
+  Mail,
+  Menu,
+  Moon,
+  RotateCcw,
+  Settings,
+  Sun,
+  Target,
+  Monitor,
+} from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../hooks/useTheme";
 import { useLastSynced } from "../hooks/useLastSynced";
 import { downloadExport } from "../api/export";
 import { BrandLogo } from "./BrandLogo";
+import { Button } from "./ui/Button";
 import { IconButton } from "./ui/IconButton";
 
 const navItems = [
@@ -14,23 +29,38 @@ const navItems = [
   { to: "/sessions", label: "Sessions", icon: Clock },
   { to: "/review", label: "Review", icon: RotateCcw },
   { to: "/goals", label: "Goals", icon: Target },
+  { to: "/settings", label: "Settings", icon: Settings },
 ];
 
 const THEME_ICON = { light: Sun, dark: Moon, system: Monitor };
 
 export function Layout() {
-  const { user, logout } = useAuth();
+  const { user, logout, resendVerification } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { preference, cyclePreference } = useTheme();
   const lastSynced = useLastSynced();
   const [exporting, setExporting] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [bannerDismissed, setBannerDismissed] = useState(false);
+  const [resendState, setResendState] = useState<"idle" | "sending" | "sent">("idle");
 
   async function handleLogout() {
     await logout();
     navigate("/login");
   }
+
+  async function handleResendVerification() {
+    setResendState("sending");
+    try {
+      await resendVerification();
+      setResendState("sent");
+    } catch {
+      setResendState("idle");
+    }
+  }
+
+  const showVerifyBanner = user && !user.email_verified && !bannerDismissed;
 
   async function handleExport() {
     setExporting(true);
@@ -111,6 +141,25 @@ export function Layout() {
           {currentTitle && <h1 className="text-lg font-semibold">{currentTitle}</h1>}
           {lastSynced && <span className="ml-auto text-xs text-neutral-500">Updated {lastSynced}</span>}
         </header>
+        {showVerifyBanner && (
+          <div className="flex flex-wrap items-center gap-3 border-b border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-300 sm:px-6">
+            <Mail className="h-4 w-4 shrink-0" />
+            <span className="flex-1">
+              {resendState === "sent" ? "Verification email sent — check your inbox." : "Please verify your email address."}
+            </span>
+            {resendState !== "sent" && (
+              <Button size="sm" variant="secondary" onClick={handleResendVerification} disabled={resendState === "sending"}>
+                Resend email
+              </Button>
+            )}
+            <button
+              onClick={() => setBannerDismissed(true)}
+              className="text-xs text-amber-700 hover:underline dark:text-amber-400"
+            >
+              Dismiss
+            </button>
+          </div>
+        )}
         <main className="flex-1 px-4 py-6 sm:px-6">
           <Outlet />
         </main>

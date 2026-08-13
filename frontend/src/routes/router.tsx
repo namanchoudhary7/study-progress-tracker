@@ -10,12 +10,15 @@ import { ReviewPage } from "../features/review/ReviewPage";
 import { GoalsPage } from "../features/goals/GoalsPage";
 import { LoginPage } from "../features/auth/LoginPage";
 import { SignupPage } from "../features/auth/SignupPage";
+import { VerifyEmailPage } from "../features/auth/VerifyEmailPage";
 import { LandingPage } from "../features/landing/LandingPage";
+import { SettingsPage } from "../features/settings/SettingsPage";
 
 export const router = createBrowserRouter([
   { path: "/", element: <LandingPage /> },
   { path: "/login", element: <LoginPage /> },
   { path: "/signup", element: <SignupPage /> },
+  { path: "/verify-email", element: <VerifyEmailPage /> },
   {
     element: <ProtectedRoute />,
     children: [
@@ -28,6 +31,7 @@ export const router = createBrowserRouter([
           { path: "sessions", element: <SessionsPage /> },
           { path: "review", element: <ReviewPage /> },
           { path: "goals", element: <GoalsPage /> },
+          { path: "settings", element: <SettingsPage /> },
         ],
       },
     ],
