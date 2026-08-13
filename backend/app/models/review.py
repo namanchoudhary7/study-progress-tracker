@@ -12,6 +12,7 @@ class ReviewSchedule(Base, TimestampMixin):
     __tablename__ = "review_schedules"
 
     id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     topic_id: Mapped[int] = mapped_column(ForeignKey("topics.id", ondelete="CASCADE"), unique=True, nullable=False)
     last_reviewed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     next_review_date: Mapped[date | None] = mapped_column(Date)
@@ -26,6 +27,7 @@ class ReviewLog(Base):
     __tablename__ = "review_logs"
 
     id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     topic_id: Mapped[int] = mapped_column(ForeignKey("topics.id", ondelete="CASCADE"), nullable=False)
     reviewed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     outcome: Mapped[ReviewOutcome] = mapped_column(Enum(ReviewOutcome, name="review_outcome"), nullable=False)

@@ -5,8 +5,10 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.dependencies.auth import get_current_user
 from app.models.review import ReviewLog, ReviewSchedule
 from app.models.topic import Topic
+from app.models.user import User
 from app.schemas.review import (
     DueReviewItem,
     ReviewCompleteRequest,
@@ -20,11 +22,13 @@ router = APIRouter(prefix="/reviews", tags=["reviews"])
 
 
 @router.get("/due", response_model=list[DueReviewItem])
-def list_due_reviews(db: Session = Depends(get_db)) -> list[DueReviewItem]:
+def list_due_reviews(
+    db: Session = Depends(get_db), current_user: User = Depends(get_current_user)
+) -> list[DueReviewItem]:
     rows = db.execute(
         select(ReviewSchedule, Topic)
         .join(Topic, Topic.id == ReviewSchedule.topic_id)
-        .where(ReviewSchedule.next_review_date <= date.today())
+        .where(ReviewSchedule.user_id == current_user.id, ReviewSchedule.next_review_date <= date.today())
         .order_by(ReviewSchedule.next_review_date)
     ).all()
 
@@ -43,10 +47,18 @@ def list_due_reviews(db: Session = Depends(get_db)) -> list[DueReviewItem]:
 
 
 @router.get("/{topic_id}", response_model=TopicReviewDetail)
-def get_topic_review(topic_id: int, db: Session = Depends(get_db)) -> TopicReviewDetail:
-    schedule = db.scalar(select(ReviewSchedule).where(ReviewSchedule.topic_id == topic_id))
+def get_topic_review(
+    topic_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)
+) -> TopicReviewDetail:
+    schedule = db.scalar(
+        select(ReviewSchedule).where(ReviewSchedule.topic_id == topic_id, ReviewSchedule.user_id == current_user.id)
+    )
     logs = list(
-        db.scalars(select(ReviewLog).where(ReviewLog.topic_id == topic_id).order_by(ReviewLog.reviewed_at.desc()))
+        db.scalars(
+            select(ReviewLog)
+            .where(ReviewLog.topic_id == topic_id, ReviewLog.user_id == current_user.id)
+            .order_by(ReviewLog.reviewed_at.desc())
+        )
     )
     return TopicReviewDetail(
         schedule=ReviewScheduleRead.model_validate(schedule) if schedule else None,
@@ -55,8 +67,15 @@ def get_topic_review(topic_id: int, db: Session = Depends(get_db)) -> TopicRevie
 
 
 @router.post("/{topic_id}/complete", response_model=ReviewScheduleRead)
-def complete_review(topic_id: int, payload: ReviewCompleteRequest, db: Session = Depends(get_db)) -> ReviewSchedule:
-    schedule = db.scalar(select(ReviewSchedule).where(ReviewSchedule.topic_id == topic_id))
+def complete_review(
+    topic_id: int,
+    payload: ReviewCompleteRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> ReviewSchedule:
+    schedule = db.scalar(
+        select(ReviewSchedule).where(ReviewSchedule.topic_id == topic_id, ReviewSchedule.user_id == current_user.id)
+    )
     if schedule is None:
         raise HTTPException(status_code=404, detail="No review schedule for this topic")
 
@@ -72,6 +91,7 @@ def complete_review(topic_id: int, payload: ReviewCompleteRequest, db: Session =
     db.add(
         ReviewLog(
             topic_id=topic_id,
+            user_id=current_user.id,
             outcome=payload.outcome,
             interval_days_before=interval_before,
             interval_days_after=interval_after,

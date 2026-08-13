@@ -15,11 +15,13 @@ class StudySession(Base, TimestampMixin):
     )
 
     id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     subject_id: Mapped[int] = mapped_column(ForeignKey("subjects.id", ondelete="CASCADE"), nullable=False)
     topic_id: Mapped[int | None] = mapped_column(ForeignKey("topics.id", ondelete="SET NULL"))
     session_date: Mapped[date] = mapped_column(Date, nullable=False)
     duration_minutes: Mapped[int] = mapped_column(Integer, nullable=False)
     notes: Mapped[str | None] = mapped_column(Text)
 
+    user: Mapped["User"] = relationship(back_populates="study_sessions")
     subject: Mapped["Subject"] = relationship(back_populates="study_sessions")
     topic: Mapped["Topic | None"] = relationship(back_populates="study_sessions")

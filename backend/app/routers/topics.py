@@ -5,32 +5,46 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.dependencies.auth import get_current_user
 from app.models.enums import TopicStatus
 from app.models.review import ReviewSchedule
+from app.models.subject import Subject
 from app.models.topic import Topic
+from app.models.user import User
 from app.schemas.topic import TopicCreate, TopicRead, TopicUpdate
 
 router = APIRouter(prefix="/topics", tags=["topics"])
 
 
-def _get_topic_or_404(db: Session, topic_id: int) -> Topic:
-    topic = db.get(Topic, topic_id)
+def _get_topic_or_404(db: Session, topic_id: int, current_user: User) -> Topic:
+    topic = db.scalar(select(Topic).where(Topic.id == topic_id, Topic.user_id == current_user.id))
     if topic is None:
         raise HTTPException(status_code=404, detail="Topic not found")
     return topic
 
 
 @router.get("", response_model=list[TopicRead])
-def list_topics(subject_id: int | None = None, db: Session = Depends(get_db)) -> list[Topic]:
-    stmt = select(Topic).order_by(Topic.order_index, Topic.id)
+def list_topics(
+    subject_id: int | None = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> list[Topic]:
+    stmt = select(Topic).where(Topic.user_id == current_user.id).order_by(Topic.order_index, Topic.id)
     if subject_id is not None:
         stmt = stmt.where(Topic.subject_id == subject_id)
     return list(db.scalars(stmt))
 
 
 @router.post("", response_model=TopicRead, status_code=201)
-def create_topic(payload: TopicCreate, db: Session = Depends(get_db)) -> Topic:
-    topic = Topic(**payload.model_dump())
+def create_topic(
+    payload: TopicCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)
+) -> Topic:
+    owns_subject = db.scalar(
+        select(Subject.id).where(Subject.id == payload.subject_id, Subject.user_id == current_user.id)
+    )
+    if owns_subject is None:
+        raise HTTPException(status_code=404, detail="Subject not found")
+    topic = Topic(**payload.model_dump(), user_id=current_user.id)
     db.add(topic)
     db.commit()
     db.refresh(topic)
@@ -38,13 +52,18 @@ def create_topic(payload: TopicCreate, db: Session = Depends(get_db)) -> Topic:
 
 
 @router.get("/{topic_id}", response_model=TopicRead)
-def get_topic(topic_id: int, db: Session = Depends(get_db)) -> Topic:
-    return _get_topic_or_404(db, topic_id)
+def get_topic(topic_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)) -> Topic:
+    return _get_topic_or_404(db, topic_id, current_user)
 
 
 @router.patch("/{topic_id}", response_model=TopicRead)
-def update_topic(topic_id: int, payload: TopicUpdate, db: Session = Depends(get_db)) -> Topic:
-    topic = _get_topic_or_404(db, topic_id)
+def update_topic(
+    topic_id: int,
+    payload: TopicUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> Topic:
+    topic = _get_topic_or_404(db, topic_id, current_user)
     updates = payload.model_dump(exclude_unset=True)
 
     was_done = topic.status == TopicStatus.done
@@ -58,6 +77,7 @@ def update_topic(topic_id: int, payload: TopicUpdate, db: Session = Depends(get_
                 db.add(
                     ReviewSchedule(
                         topic_id=topic.id,
+                        user_id=current_user.id,
                         interval_days=1,
                         next_review_date=(datetime.now(timezone.utc) + timedelta(days=1)).date(),
                     )
@@ -71,7 +91,9 @@ def update_topic(topic_id: int, payload: TopicUpdate, db: Session = Depends(get_
 
 
 @router.delete("/{topic_id}", status_code=204)
-def delete_topic(topic_id: int, db: Session = Depends(get_db)) -> None:
-    topic = _get_topic_or_404(db, topic_id)
+def delete_topic(
+    topic_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)
+) -> None:
+    topic = _get_topic_or_404(db, topic_id, current_user)
     db.delete(topic)
     db.commit()

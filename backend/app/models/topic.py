@@ -12,6 +12,7 @@ class Topic(Base, TimestampMixin):
     __tablename__ = "topics"
 
     id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     subject_id: Mapped[int] = mapped_column(ForeignKey("subjects.id", ondelete="CASCADE"), nullable=False)
     name: Mapped[str] = mapped_column(String(200), nullable=False)
     description: Mapped[str | None] = mapped_column(Text)
@@ -23,6 +24,7 @@ class Topic(Base, TimestampMixin):
     target_date: Mapped[date | None] = mapped_column(Date)
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
+    user: Mapped["User"] = relationship(back_populates="topics")
     subject: Mapped["Subject"] = relationship(back_populates="topics")
     study_sessions: Mapped[list["StudySession"]] = relationship(back_populates="topic")
     goals: Mapped[list["Goal"]] = relationship(back_populates="topic")

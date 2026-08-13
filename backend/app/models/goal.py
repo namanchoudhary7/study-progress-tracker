@@ -18,6 +18,7 @@ class Goal(Base, TimestampMixin):
     )
 
     id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     subject_id: Mapped[int | None] = mapped_column(ForeignKey("subjects.id", ondelete="CASCADE"))
     topic_id: Mapped[int | None] = mapped_column(ForeignKey("topics.id", ondelete="CASCADE"))
     title: Mapped[str] = mapped_column(String(300), nullable=False)
@@ -27,5 +28,6 @@ class Goal(Base, TimestampMixin):
     )
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
+    user: Mapped["User"] = relationship(back_populates="goals")
     subject: Mapped["Subject | None"] = relationship(back_populates="goals")
     topic: Mapped["Topic | None"] = relationship(back_populates="goals")

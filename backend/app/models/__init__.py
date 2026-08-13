@@ -3,6 +3,7 @@ from app.models.review import ReviewLog, ReviewSchedule
 from app.models.study_session import StudySession
 from app.models.subject import Subject
 from app.models.topic import Topic
+from app.models.user import User
 
 __all__ = [
     "Goal",
@@ -11,4 +12,5 @@ __all__ = [
     "StudySession",
     "Subject",
     "Topic",
+    "User",
 ]

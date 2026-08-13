@@ -19,11 +19,20 @@ from app.schemas.stats import (
 )
 
 
-def get_overview(db: Session) -> OverviewStats:
-    total_subjects = db.scalar(select(func.count()).select_from(Subject)) or 0
-    total_topics = db.scalar(select(func.count()).select_from(Topic)) or 0
-    topics_done = db.scalar(select(func.count()).where(Topic.status == TopicStatus.done)) or 0
-    total_minutes = db.scalar(select(func.coalesce(func.sum(StudySession.duration_minutes), 0))) or 0
+def get_overview(db: Session, user_id: int) -> OverviewStats:
+    total_subjects = db.scalar(select(func.count()).select_from(Subject).where(Subject.user_id == user_id)) or 0
+    total_topics = db.scalar(select(func.count()).select_from(Topic).where(Topic.user_id == user_id)) or 0
+    topics_done = (
+        db.scalar(select(func.count()).where(Topic.user_id == user_id, Topic.status == TopicStatus.done)) or 0
+    )
+    total_minutes = (
+        db.scalar(
+            select(func.coalesce(func.sum(StudySession.duration_minutes), 0)).where(
+                StudySession.user_id == user_id
+            )
+        )
+        or 0
+    )
     completion_pct = round((topics_done / total_topics) * 100, 1) if total_topics else 0.0
 
     return OverviewStats(
@@ -35,7 +44,7 @@ def get_overview(db: Session) -> OverviewStats:
     )
 
 
-def get_completion(db: Session) -> list[CompletionItem]:
+def get_completion(db: Session, user_id: int) -> list[CompletionItem]:
     rows = db.execute(
         select(
             Subject.id,
@@ -44,6 +53,7 @@ def get_completion(db: Session) -> list[CompletionItem]:
             func.sum(case((Topic.status == TopicStatus.done, 1), else_=0)),
         )
         .outerjoin(Topic, Topic.subject_id == Subject.id)
+        .where(Subject.user_id == user_id)
         .group_by(Subject.id, Subject.name)
         .order_by(Subject.name)
     ).all()
@@ -60,9 +70,9 @@ def get_completion(db: Session) -> list[CompletionItem]:
 
 
 def get_time_spent(
-    db: Session, date_from: date | None, date_to: date | None, group_by: str
+    db: Session, user_id: int, date_from: date | None, date_to: date | None, group_by: str
 ) -> list[TimeSpentPoint]:
-    stmt = select(StudySession)
+    stmt = select(StudySession).where(StudySession.user_id == user_id)
     if date_from is not None:
         stmt = stmt.where(StudySession.session_date >= date_from)
     if date_to is not None:
@@ -71,7 +81,7 @@ def get_time_spent(
 
     buckets: dict[str, int] = {}
     if group_by == "subject":
-        subject_names = {s.id: s.name for s in db.scalars(select(Subject))}
+        subject_names = {s.id: s.name for s in db.scalars(select(Subject).where(Subject.user_id == user_id))}
         for s in sessions:
             key = subject_names.get(s.subject_id, "Unknown")
             buckets[key] = buckets.get(key, 0) + s.duration_minutes
@@ -88,8 +98,8 @@ def get_time_spent(
     return [TimeSpentPoint(label=k, minutes=v) for k, v in sorted(buckets.items())]
 
 
-def get_streaks(db: Session) -> StreakStats:
-    distinct_dates = sorted(set(db.scalars(select(StudySession.session_date))))
+def get_streaks(db: Session, user_id: int) -> StreakStats:
+    distinct_dates = sorted(set(db.scalars(select(StudySession.session_date).where(StudySession.user_id == user_id))))
     if not distinct_dates:
         return StreakStats(current_streak=0, longest_streak=0)
 
@@ -119,16 +129,23 @@ def get_streaks(db: Session) -> StreakStats:
     return StreakStats(current_streak=current, longest_streak=longest)
 
 
-def get_overdue(db: Session) -> OverdueSummary:
+def get_overdue(db: Session, user_id: int) -> OverdueSummary:
     today = date.today()
     overdue_goals = list(
         db.scalars(
-            select(Goal).where(Goal.status == GoalStatus.open, Goal.target_date < today).order_by(Goal.target_date)
+            select(Goal)
+            .where(Goal.user_id == user_id, Goal.status == GoalStatus.open, Goal.target_date < today)
+            .order_by(Goal.target_date)
         )
     )
-    due_reviews_count = db.scalar(
-        select(func.count()).select_from(ReviewSchedule).where(ReviewSchedule.next_review_date <= today)
-    ) or 0
+    due_reviews_count = (
+        db.scalar(
+            select(func.count())
+            .select_from(ReviewSchedule)
+            .where(ReviewSchedule.user_id == user_id, ReviewSchedule.next_review_date <= today)
+        )
+        or 0
+    )
 
     return OverdueSummary(
         overdue_goals=[OverdueGoal(id=g.id, title=g.title, target_date=g.target_date) for g in overdue_goals],
