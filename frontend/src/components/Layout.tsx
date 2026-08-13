@@ -1,5 +1,8 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useTheme } from "../hooks/useTheme";
+
+const THEME_ICON = { light: "☀️", dark: "🌙", system: "🖥️" };
 
 const navItems = [
   { to: "/", label: "Dashboard" },
@@ -12,6 +15,7 @@ const navItems = [
 export function Layout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const { preference, cyclePreference } = useTheme();
 
   async function handleLogout() {
     await logout();
@@ -42,6 +46,13 @@ export function Layout() {
           </div>
           <div className="flex items-center gap-3 text-sm text-neutral-500">
             {user && <span>Signed in as {user.email}</span>}
+            <button
+              onClick={cyclePreference}
+              title={`Theme: ${preference}`}
+              className="rounded border border-neutral-300 px-2 py-1 text-xs hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-800"
+            >
+              {THEME_ICON[preference]}
+            </button>
             <button onClick={handleLogout} className="rounded border border-neutral-300 px-2 py-1 text-xs hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-800">
               Log out
             </button>

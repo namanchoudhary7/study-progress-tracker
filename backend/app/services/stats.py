@@ -49,22 +49,30 @@ def get_completion(db: Session, user_id: int) -> list[CompletionItem]:
         select(
             Subject.id,
             Subject.name,
+            Subject.color,
             func.count(Topic.id),
             func.sum(case((Topic.status == TopicStatus.done, 1), else_=0)),
         )
         .outerjoin(Topic, Topic.subject_id == Subject.id)
         .where(Subject.user_id == user_id)
-        .group_by(Subject.id, Subject.name)
+        .group_by(Subject.id, Subject.name, Subject.color)
         .order_by(Subject.name)
     ).all()
 
     items = []
-    for subject_id, name, total, done in rows:
+    for subject_id, name, color, total, done in rows:
         total = total or 0
         done = done or 0
         pct = round((done / total) * 100, 1) if total else 0.0
         items.append(
-            CompletionItem(subject_id=subject_id, subject_name=name, total_topics=total, done_topics=done, completion_pct=pct)
+            CompletionItem(
+                subject_id=subject_id,
+                subject_name=name,
+                subject_color=color,
+                total_topics=total,
+                done_topics=done,
+                completion_pct=pct,
+            )
         )
     return items
 

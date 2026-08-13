@@ -14,6 +14,7 @@ class OverviewStats(BaseModel):
 class CompletionItem(BaseModel):
     subject_id: int
     subject_name: str
+    subject_color: str | None
     total_topics: int
     done_topics: int
     completion_pct: float

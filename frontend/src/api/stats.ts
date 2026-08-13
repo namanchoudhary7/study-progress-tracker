@@ -11,6 +11,7 @@ export interface OverviewStats {
 export interface CompletionItem {
   subject_id: number;
   subject_name: string;
+  subject_color: string | null;
   total_topics: number;
   done_topics: number;
   completion_pct: number;

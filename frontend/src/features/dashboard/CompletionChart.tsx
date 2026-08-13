@@ -30,7 +30,7 @@ export function CompletionChart() {
           />
           <Bar dataKey="completion_pct" radius={[0, 4, 4, 0]} maxBarSize={20}>
             {data.map((entry) => (
-              <Cell key={entry.subject_id} fill="var(--series-1)" />
+              <Cell key={entry.subject_id} fill={entry.subject_color ?? "var(--series-1)"} />
             ))}
           </Bar>
         </BarChart>

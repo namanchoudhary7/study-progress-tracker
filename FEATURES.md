@@ -12,7 +12,7 @@ A plain-language walkthrough of what this app does and how it's built. Written f
 
 ## Subjects & Topics (curriculum tracking)
 
-**What it does:** You create a "Subject" (like "Mathematics" or "Organic Chemistry"), and break it into "Topics" (like "Derivatives" or "Chapter 3: Alkanes"). Each topic has a status — To Do, In Progress, or Done — plus optional notes and a target date.
+**What it does:** You create a "Subject" (like "Mathematics" or "Organic Chemistry"), and break it into "Topics" (like "Derivatives" or "Chapter 3: Alkanes"). Each topic has a status — To Do, In Progress, or Done — plus optional notes and a target date. You can edit or delete any subject or topic at any time, and give each subject its own color, which then shows up consistently everywhere that subject appears (its row, and its bar on the dashboard chart) so you can recognize it at a glance.
 
 **Why it's useful:** Most study plans live in someone's head or a messy notes app. This turns a syllabus into a checklist you can actually track completion against, subject by subject.
 
@@ -49,6 +49,14 @@ A plain-language walkthrough of what this app does and how it's built. Written f
 **Why it's useful:** This is the same idea behind flashcard apps like Anki: things you learn are forgotten unless revisited, and the best time to revisit is right before you'd otherwise forget. Rather than reviewing everything constantly (wasteful) or never (you forget it), the app waits longer between reviews each time you remember something well, and resets to short intervals when you don't.
 
 **How it works:** Every topic gets its own "next review date." When you review it, picking "Good" roughly doubles the wait until the next review, "Easy" increases it even more, and "Again" resets it back to reviewing tomorrow. A full history of every review (and how it went) is kept, so long-term retention trends could be analyzed later.
+
+## Dark Mode
+
+**What it does:** A button in the top-right lets you cycle between light, dark, and "match my system" appearance, independent of what your operating system is set to.
+
+**Why it's useful:** Some people prefer dark mode always, regardless of their OS setting (e.g. studying at night with a light-mode OS), or vice versa. Giving an explicit override respects that instead of forcing one behavior.
+
+**How it works:** Your choice is remembered in the browser (not tied to your account), so it persists across visits on that device without needing a server round-trip.
 
 ---
 *(A section for future AI Insights will be added once that feature is built.)*
