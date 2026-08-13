@@ -2,6 +2,14 @@
 
 A plain-language walkthrough of what this app does and how it's built. Written for both technical and non-technical readers — useful for explaining the project in an interview.
 
+## Accounts & Sign-in
+
+**What it does:** You can create an account with an email and password, or sign in with Google. Once signed in, everything you add — subjects, topics, sessions, goals — belongs only to you. Someone else using the app has their own completely separate set of data.
+
+**Why it's useful:** This turns the app from something only one person could ever use into something anyone can sign up for. It also means your study data is private — no one else can see or touch it, even though everyone shares the same app and database.
+
+**How it works:** When you log in, the server gives your browser two small pieces of signed, tamper-proof information (called tokens) instead of a plain password — one that expires quickly and one that lasts longer to keep you logged in without re-entering your password constantly. Every piece of data in the app (a subject, a topic, a study session) is stamped with an invisible owner ID the moment it's created, and every time the app fetches or changes data, the server double-checks that owner ID matches whoever is logged in — so it's not just that the app *doesn't show* other people's data, it's that the server *refuses* to hand it over or let it be modified, even if someone tried to access it directly.
+
 ## Subjects & Topics (curriculum tracking)
 
 **What it does:** You create a "Subject" (like "Mathematics" or "Organic Chemistry"), and break it into "Topics" (like "Derivatives" or "Chapter 3: Alkanes"). Each topic has a status — To Do, In Progress, or Done — plus optional notes and a target date.
