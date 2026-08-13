@@ -8,7 +8,7 @@ interface AuthContextValue {
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<AuthUser>;
-  signup: (email: string, password: string) => Promise<AuthUser>;
+  signup: (email: string, username: string, password: string) => Promise<AuthUser>;
   logout: () => Promise<void>;
   loginError: string | null;
   signupError: string | null;
@@ -40,7 +40,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   });
 
   const signupMutation = useMutation({
-    mutationFn: ({ email, password }: { email: string; password: string }) => authApi.signup(email, password),
+    mutationFn: ({ email, username, password }: { email: string; username: string; password: string }) =>
+      authApi.signup(email, username, password),
     onSuccess: (user) => {
       setCsrfToken(user.csrf_token);
       qc.setQueryData(ME_KEY, user);
@@ -61,7 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isLoading: meQuery.isLoading,
     isAuthenticated: !!meQuery.data,
     login: (email, password) => loginMutation.mutateAsync({ email, password }),
-    signup: (email, password) => signupMutation.mutateAsync({ email, password }),
+    signup: (email, username, password) => signupMutation.mutateAsync({ email, username, password }),
     logout: () => logoutMutation.mutateAsync(),
     loginError: loginMutation.error ? loginMutation.error.message : null,
     signupError: signupMutation.error ? signupMutation.error.message : null,

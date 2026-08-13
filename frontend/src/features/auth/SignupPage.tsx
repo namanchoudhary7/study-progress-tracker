@@ -12,6 +12,7 @@ export function SignupPage() {
   const { signup, signupError } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -19,7 +20,7 @@ export function SignupPage() {
     e.preventDefault();
     setSubmitting(true);
     try {
-      await signup(email, password);
+      await signup(email, username, password);
       navigate("/dashboard");
     } catch {
       // error surfaced via signupError
@@ -51,6 +52,18 @@ export function SignupPage() {
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+          />
+          <Input
+            type="text"
+            required
+            minLength={3}
+            maxLength={30}
+            pattern="[a-z0-9_]+"
+            title="Lowercase letters, numbers, and underscores only"
+            className="w-full"
+            placeholder="Username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value.toLowerCase())}
           />
           <Input
             type="password"

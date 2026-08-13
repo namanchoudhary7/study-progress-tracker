@@ -12,6 +12,7 @@ from app.core.security import create_access_token, create_refresh_token, decode_
 from app.dependencies.auth import get_current_user
 from app.models.user import User
 from app.schemas.user import AuthResponse, UserCreate, UserLogin
+from app.services.username import generate_unique_username
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -27,7 +28,12 @@ oauth.register(
 
 def _auth_response(user: User, csrf_token: str) -> AuthResponse:
     return AuthResponse(
-        id=user.id, email=user.email, display_name=user.display_name, created_at=user.created_at, csrf_token=csrf_token
+        id=user.id,
+        email=user.email,
+        username=user.username,
+        display_name=user.display_name,
+        created_at=user.created_at,
+        csrf_token=csrf_token,
     )
 
 
@@ -35,9 +41,12 @@ def _auth_response(user: User, csrf_token: str) -> AuthResponse:
 def signup(payload: UserCreate, response: Response, db: Session = Depends(get_db)) -> AuthResponse:
     if db.scalar(select(User).where(User.email == payload.email)):
         raise HTTPException(status_code=409, detail="Email already registered")
+    if db.scalar(select(User).where(User.username == payload.username)):
+        raise HTTPException(status_code=409, detail="Username already taken")
 
     user = User(
         email=payload.email,
+        username=payload.username,
         hashed_password=hash_password(payload.password),
         display_name=payload.display_name,
     )
@@ -110,7 +119,8 @@ async def google_callback(request: Request, db: Session = Depends(get_db)):
         if user is not None:
             user.google_id = google_id
         else:
-            user = User(email=email, google_id=google_id, display_name=userinfo.get("name"))
+            username = generate_unique_username(db, email.split("@")[0])
+            user = User(email=email, username=username, google_id=google_id, display_name=userinfo.get("name"))
             db.add(user)
     db.commit()
     db.refresh(user)
