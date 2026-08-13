@@ -4,6 +4,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import './index.css'
 import App from './App.tsx'
 import { AuthProvider } from './context/AuthContext.tsx'
+import { TimerProvider } from './context/TimerContext.tsx'
+import { ToastProvider } from './components/Toast.tsx'
 import { markSynced } from './lib/lastSynced.ts'
 
 const queryClient = new QueryClient()
@@ -18,7 +20,11 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <App />
+        <ToastProvider>
+          <TimerProvider>
+            <App />
+          </TimerProvider>
+        </ToastProvider>
       </AuthProvider>
     </QueryClientProvider>
   </StrictMode>,

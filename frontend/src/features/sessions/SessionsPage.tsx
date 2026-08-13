@@ -1,14 +1,14 @@
 import { useState } from "react";
-import { Clock, History, Pause, Play, Square } from "lucide-react";
+import { History } from "lucide-react";
 import { Card } from "../../components/Card";
 import { ErrorBanner } from "../../components/ErrorBanner";
+import { TimerWidget } from "../../components/TimerWidget";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
 import { Select } from "../../components/ui/Select";
 import { useSubjects } from "../../hooks/useSubjects";
 import { useTopics } from "../../hooks/useTopics";
 import { useCreateSession, useSessions, useUpdateSession } from "../../hooks/useSessions";
-import { useStopwatch } from "../../hooks/useStopwatch";
 import type { StudySession } from "../../api/types";
 
 function todayISO() {
@@ -60,14 +60,8 @@ export function SessionsPage() {
   const [date, setDate] = useState(todayISO());
   const [minutes, setMinutes] = useState("");
   const [notes, setNotes] = useState("");
-  const stopwatch = useStopwatch();
 
   const { data: topics } = useTopics(subjectId === "" ? undefined : subjectId);
-
-  function handleStopTimer() {
-    setMinutes(String(Math.max(1, stopwatch.elapsedMinutes)));
-    stopwatch.reset();
-  }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -88,33 +82,10 @@ export function SessionsPage() {
 
   return (
     <div className="space-y-6">
+      <TimerWidget />
+
       <Card>
-        <div className="mb-3 flex flex-wrap items-center gap-3 rounded-lg border border-neutral-200 bg-neutral-50 px-3 py-2 text-sm dark:border-neutral-800 dark:bg-neutral-950">
-          <Clock className="h-4 w-4 text-neutral-500" />
-          <span className="font-medium">Timer:</span>
-          <span className="tabular-nums text-neutral-600 dark:text-neutral-400">{stopwatch.elapsedLabel}</span>
-          {stopwatch.isRunning ? (
-            <>
-              <Button size="sm" icon={Pause} onClick={stopwatch.pause}>
-                Pause
-              </Button>
-              <Button size="sm" variant="primary" icon={Square} onClick={handleStopTimer}>
-                Stop &amp; use time
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button size="sm" icon={Play} onClick={stopwatch.start}>
-                {stopwatch.elapsedMinutes > 0 ? "Resume" : "Start timer"}
-              </Button>
-              {stopwatch.elapsedMinutes > 0 && (
-                <Button size="sm" variant="primary" icon={Square} onClick={handleStopTimer}>
-                  Use time
-                </Button>
-              )}
-            </>
-          )}
-        </div>
+        <h2 className="mb-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">Log a session manually</h2>
         <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-3 sm:grid-cols-5">
           <Select
             value={subjectId}

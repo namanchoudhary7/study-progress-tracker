@@ -1,18 +1,22 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import { BookOpen, Pencil, Trash2 } from "lucide-react";
 import { Card } from "../../components/Card";
 import { ErrorBanner } from "../../components/ErrorBanner";
+import { useToast } from "../../components/Toast";
 import { Button } from "../../components/ui/Button";
 import { IconButton } from "../../components/ui/IconButton";
 import { Input } from "../../components/ui/Input";
-import { useCreateSubject, useDeleteSubject, useSubjects, useUpdateSubject } from "../../hooks/useSubjects";
+import { subjectsKey, useCreateSubject, useDeleteSubject, useSubjects, useUpdateSubject } from "../../hooks/useSubjects";
 import { useTopics } from "../../hooks/useTopics";
 import type { Subject } from "../../api/types";
 
 const DEFAULT_COLOR = "#2a78d6";
 
 function SubjectRow({ subject }: { subject: Subject }) {
+  const qc = useQueryClient();
+  const { showUndoToast } = useToast();
   const { data: topics } = useTopics(subject.id);
   const updateSubject = useUpdateSubject();
   const deleteSubject = useDeleteSubject();
@@ -34,9 +38,12 @@ function SubjectRow({ subject }: { subject: Subject }) {
   }
 
   function handleDelete() {
-    if (window.confirm(`Delete "${subject.name}" and all its topics? This cannot be undone.`)) {
-      deleteSubject.mutate(subject.id);
-    }
+    qc.setQueryData<Subject[]>(subjectsKey, (old) => old?.filter((s) => s.id !== subject.id));
+    showUndoToast({
+      message: `Deleted "${subject.name}" and all its topics`,
+      onUndo: () => qc.invalidateQueries({ queryKey: subjectsKey }),
+      onExpire: () => deleteSubject.mutate(subject.id),
+    });
   }
 
   if (editing) {

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { BookOpen, CheckSquare, Clock, Flame } from "lucide-react";
 import { Card } from "../../components/Card";
 import { ErrorBanner } from "../../components/ErrorBanner";
+import { TimerWidget } from "../../components/TimerWidget";
 import { Button } from "../../components/ui/Button";
 import { useOverviewStats, useStreakStats } from "../../hooks/useStats";
 import { StatTile } from "./StatTile";
@@ -18,6 +19,8 @@ export function DashboardPage() {
   return (
     <div className="space-y-6">
       {isError && <ErrorBanner message={error.message} onRetry={() => refetch()} />}
+
+      <TimerWidget />
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <StatTile icon={BookOpen} label="Subjects" value={String(overview?.total_subjects ?? "—")} />

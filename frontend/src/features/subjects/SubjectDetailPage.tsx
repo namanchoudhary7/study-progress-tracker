@@ -1,20 +1,31 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import { ListChecks, Pencil, Trash2 } from "lucide-react";
 import { Card } from "../../components/Card";
 import { TopicStatusBadge } from "../../components/StatusBadge";
+import { useToast } from "../../components/Toast";
 import { Button } from "../../components/ui/Button";
 import { IconButton } from "../../components/ui/IconButton";
 import { Input } from "../../components/ui/Input";
 import { Select } from "../../components/ui/Select";
 import { Textarea } from "../../components/ui/Textarea";
 import { useSubjects } from "../../hooks/useSubjects";
-import { useBulkCreateTopics, useCreateTopic, useDeleteTopic, useTopics, useUpdateTopic } from "../../hooks/useTopics";
+import {
+  topicsKey,
+  useBulkCreateTopics,
+  useCreateTopic,
+  useDeleteTopic,
+  useTopics,
+  useUpdateTopic,
+} from "../../hooks/useTopics";
 import type { Topic, TopicStatus } from "../../api/types";
 
 const STATUS_OPTIONS: TopicStatus[] = ["todo", "in_progress", "done"];
 
 function TopicRow({ topic }: { topic: Topic }) {
+  const qc = useQueryClient();
+  const { showUndoToast } = useToast();
   const updateTopic = useUpdateTopic();
   const deleteTopic = useDeleteTopic();
   const [editing, setEditing] = useState(false);
@@ -27,9 +38,13 @@ function TopicRow({ topic }: { topic: Topic }) {
   }
 
   function handleDelete() {
-    if (window.confirm(`Delete "${topic.name}"? This cannot be undone.`)) {
-      deleteTopic.mutate(topic.id);
-    }
+    const key = topicsKey(topic.subject_id);
+    qc.setQueryData<Topic[]>(key, (old) => old?.filter((t) => t.id !== topic.id));
+    showUndoToast({
+      message: `Deleted "${topic.name}"`,
+      onUndo: () => qc.invalidateQueries({ queryKey: key }),
+      onExpire: () => deleteTopic.mutate(topic.id),
+    });
   }
 
   if (editing) {

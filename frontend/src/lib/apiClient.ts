@@ -1,8 +1,31 @@
-import { getCsrfToken } from "./csrfToken";
+import { getCsrfToken, setCsrfToken } from "./csrfToken";
 
 const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000/api/v1";
 
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
+// Endpoints where a 401 means "these credentials are actually invalid" — attempting a
+// silent refresh here would be pointless (or, for /auth/refresh itself, recursive).
+const NO_REFRESH_PATHS = ["/auth/login", "/auth/signup", "/auth/refresh", "/auth/logout"];
+
+let refreshPromise: Promise<boolean> | null = null;
+
+function refreshSession(): Promise<boolean> {
+  if (!refreshPromise) {
+    refreshPromise = fetch(`${API_URL}/auth/refresh`, { method: "POST", credentials: "include" })
+      .then(async (res) => {
+        if (!res.ok) return false;
+        const data = await res.json();
+        setCsrfToken(data.csrf_token);
+        return true;
+      })
+      .catch(() => false)
+      .finally(() => {
+        refreshPromise = null;
+      });
+  }
+  return refreshPromise;
+}
+
+async function request<T>(path: string, init?: RequestInit, isRetry = false): Promise<T> {
   const method = init?.method ?? "GET";
   const headers: Record<string, string> = { "Content-Type": "application/json" };
   if (method !== "GET") {
@@ -15,6 +38,12 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     headers,
     ...init,
   });
+
+  if (res.status === 401 && !isRetry && !NO_REFRESH_PATHS.includes(path)) {
+    const refreshed = await refreshSession();
+    if (refreshed) return request<T>(path, init, true);
+  }
+
   if (!res.ok) {
     const body = await res.text();
     throw new Error(`${res.status} ${res.statusText}: ${body}`);
