@@ -39,6 +39,8 @@ def set_auth_cookies(response: Response, access_token: str, refresh_token: str) 
 
 
 def clear_auth_cookies(response: Response) -> None:
-    response.delete_cookie(ACCESS_COOKIE, path="/")
-    response.delete_cookie(REFRESH_COOKIE, path="/api/v1/auth/refresh")
-    response.delete_cookie(CSRF_COOKIE, path="/")
+    # Browsers only honor a cookie deletion if secure/samesite/httponly match how it was
+    # originally set — otherwise the Set-Cookie is silently ignored and the cookie lingers.
+    response.delete_cookie(ACCESS_COOKIE, **_base_kwargs("/"))
+    response.delete_cookie(REFRESH_COOKIE, **_base_kwargs("/api/v1/auth/refresh"))
+    response.delete_cookie(CSRF_COOKIE, **_base_kwargs("/"))
