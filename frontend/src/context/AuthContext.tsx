@@ -1,6 +1,7 @@
-import { createContext, useContext, type ReactNode } from "react";
+import { createContext, useContext, useEffect, type ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { authApi, type AuthUser } from "../api/auth";
+import { setCsrfToken } from "../lib/csrfToken";
 
 interface AuthContextValue {
   user: AuthUser | null | undefined;
@@ -26,19 +27,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     staleTime: 5 * 60 * 1000,
   });
 
+  useEffect(() => {
+    setCsrfToken(meQuery.data?.csrf_token ?? null);
+  }, [meQuery.data]);
+
   const loginMutation = useMutation({
     mutationFn: ({ email, password }: { email: string; password: string }) => authApi.login(email, password),
-    onSuccess: (user) => qc.setQueryData(ME_KEY, user),
+    onSuccess: (user) => {
+      setCsrfToken(user.csrf_token);
+      qc.setQueryData(ME_KEY, user);
+    },
   });
 
   const signupMutation = useMutation({
     mutationFn: ({ email, password }: { email: string; password: string }) => authApi.signup(email, password),
-    onSuccess: (user) => qc.setQueryData(ME_KEY, user),
+    onSuccess: (user) => {
+      setCsrfToken(user.csrf_token);
+      qc.setQueryData(ME_KEY, user);
+    },
   });
 
   const logoutMutation = useMutation({
     mutationFn: authApi.logout,
     onSuccess: () => {
+      setCsrfToken(null);
       qc.setQueryData(ME_KEY, null);
       qc.clear();
     },

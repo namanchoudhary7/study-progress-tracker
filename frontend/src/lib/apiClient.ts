@@ -1,15 +1,12 @@
-const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000/api/v1";
+import { getCsrfToken } from "./csrfToken";
 
-function readCookie(name: string): string | null {
-  const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
-  return match ? decodeURIComponent(match[1]) : null;
-}
+const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000/api/v1";
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const method = init?.method ?? "GET";
   const headers: Record<string, string> = { "Content-Type": "application/json" };
   if (method !== "GET") {
-    const csrfToken = readCookie("csrf_token");
+    const csrfToken = getCsrfToken();
     if (csrfToken) headers["X-CSRF-Token"] = csrfToken;
   }
 

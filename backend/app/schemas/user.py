@@ -21,3 +21,7 @@ class UserRead(BaseModel):
     email: str
     display_name: str | None
     created_at: datetime
+
+
+class AuthResponse(UserRead):
+    csrf_token: str

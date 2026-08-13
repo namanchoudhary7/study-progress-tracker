@@ -15,7 +15,15 @@ def _base_kwargs(path: str) -> dict:
     return {"httponly": True, "secure": False, "samesite": "lax", "path": path}
 
 
-def set_auth_cookies(response: Response, access_token: str, refresh_token: str) -> None:
+def set_auth_cookies(response: Response, access_token: str, refresh_token: str) -> str:
+    """Sets the access/refresh/CSRF cookies and returns the CSRF token value.
+
+    The CSRF token is also returned (not just set as a cookie) because the
+    frontend runs on a different domain than the API — cross-origin cookies
+    set by the API response aren't readable via document.cookie on the
+    frontend's own origin, so the token must be handed back in the response
+    body for the frontend to echo on subsequent requests.
+    """
     response.set_cookie(ACCESS_COOKIE, access_token, max_age=settings.access_token_expire_minutes * 60, **_base_kwargs("/"))
     response.set_cookie(
         REFRESH_COOKIE,
@@ -23,9 +31,11 @@ def set_auth_cookies(response: Response, access_token: str, refresh_token: str) 
         max_age=settings.refresh_token_expire_days * 24 * 60 * 60,
         **_base_kwargs("/api/v1/auth/refresh"),
     )
-    csrf_kwargs = _base_kwargs("/")
-    csrf_kwargs["httponly"] = False
-    response.set_cookie(CSRF_COOKIE, secrets.token_urlsafe(32), max_age=settings.refresh_token_expire_days * 24 * 60 * 60, **csrf_kwargs)
+    csrf_token = secrets.token_urlsafe(32)
+    response.set_cookie(
+        CSRF_COOKIE, csrf_token, max_age=settings.refresh_token_expire_days * 24 * 60 * 60, **_base_kwargs("/")
+    )
+    return csrf_token
 
 
 def clear_auth_cookies(response: Response) -> None:

@@ -6,12 +6,12 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
-from app.core.cookies import REFRESH_COOKIE, clear_auth_cookies, set_auth_cookies
+from app.core.cookies import CSRF_COOKIE, REFRESH_COOKIE, clear_auth_cookies, set_auth_cookies
 from app.core.database import get_db
 from app.core.security import create_access_token, create_refresh_token, decode_token, hash_password, verify_password
 from app.dependencies.auth import get_current_user
 from app.models.user import User
-from app.schemas.user import UserCreate, UserLogin, UserRead
+from app.schemas.user import AuthResponse, UserCreate, UserLogin
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -25,8 +25,14 @@ oauth.register(
 )
 
 
-@router.post("/signup", response_model=UserRead, status_code=201)
-def signup(payload: UserCreate, response: Response, db: Session = Depends(get_db)) -> User:
+def _auth_response(user: User, csrf_token: str) -> AuthResponse:
+    return AuthResponse(
+        id=user.id, email=user.email, display_name=user.display_name, created_at=user.created_at, csrf_token=csrf_token
+    )
+
+
+@router.post("/signup", response_model=AuthResponse, status_code=201)
+def signup(payload: UserCreate, response: Response, db: Session = Depends(get_db)) -> AuthResponse:
     if db.scalar(select(User).where(User.email == payload.email)):
         raise HTTPException(status_code=409, detail="Email already registered")
 
@@ -39,20 +45,20 @@ def signup(payload: UserCreate, response: Response, db: Session = Depends(get_db
     db.commit()
     db.refresh(user)
 
-    set_auth_cookies(response, create_access_token(user.id), create_refresh_token(user.id))
-    return user
+    csrf_token = set_auth_cookies(response, create_access_token(user.id), create_refresh_token(user.id))
+    return _auth_response(user, csrf_token)
 
 
-@router.post("/login", response_model=UserRead)
-def login(payload: UserLogin, response: Response, db: Session = Depends(get_db)) -> User:
+@router.post("/login", response_model=AuthResponse)
+def login(payload: UserLogin, response: Response, db: Session = Depends(get_db)) -> AuthResponse:
     user = db.scalar(select(User).where(User.email == payload.email))
     if user is None or user.hashed_password is None:
         raise HTTPException(status_code=401, detail="Invalid email or password")
     if not verify_password(payload.password, user.hashed_password):
         raise HTTPException(status_code=401, detail="Invalid email or password")
 
-    set_auth_cookies(response, create_access_token(user.id), create_refresh_token(user.id))
-    return user
+    csrf_token = set_auth_cookies(response, create_access_token(user.id), create_refresh_token(user.id))
+    return _auth_response(user, csrf_token)
 
 
 @router.post("/logout", status_code=204)
@@ -60,8 +66,8 @@ def logout(response: Response) -> None:
     clear_auth_cookies(response)
 
 
-@router.post("/refresh", response_model=UserRead)
-def refresh(request: Request, response: Response, db: Session = Depends(get_db)) -> User:
+@router.post("/refresh", response_model=AuthResponse)
+def refresh(request: Request, response: Response, db: Session = Depends(get_db)) -> AuthResponse:
     token = request.cookies.get(REFRESH_COOKIE)
     if not token:
         raise HTTPException(status_code=401, detail="Not authenticated")
@@ -76,13 +82,14 @@ def refresh(request: Request, response: Response, db: Session = Depends(get_db))
     if user is None:
         raise HTTPException(status_code=401, detail="Not authenticated")
 
-    set_auth_cookies(response, create_access_token(user.id), create_refresh_token(user.id))
-    return user
+    csrf_token = set_auth_cookies(response, create_access_token(user.id), create_refresh_token(user.id))
+    return _auth_response(user, csrf_token)
 
 
-@router.get("/me", response_model=UserRead)
-def me(current_user: User = Depends(get_current_user)) -> User:
-    return current_user
+@router.get("/me", response_model=AuthResponse)
+def me(request: Request, current_user: User = Depends(get_current_user)) -> AuthResponse:
+    csrf_token = request.cookies.get(CSRF_COOKIE, "")
+    return _auth_response(current_user, csrf_token)
 
 
 @router.get("/google/login")

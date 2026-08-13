@@ -5,6 +5,7 @@ export interface AuthUser {
   email: string;
   display_name: string | null;
   created_at: string;
+  csrf_token: string;
 }
 
 const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000/api/v1";
