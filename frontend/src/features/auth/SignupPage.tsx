@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { GraduationCap } from "lucide-react";
+import { ArrowLeft, GraduationCap } from "lucide-react";
 import { Card } from "../../components/Card";
 import { ErrorBanner } from "../../components/ErrorBanner";
 import { Button } from "../../components/ui/Button";
@@ -29,11 +29,17 @@ export function SignupPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-neutral-50 px-4 dark:bg-neutral-950">
-      <div className="flex items-center gap-2 text-neutral-900 dark:text-neutral-100">
+    <div className="relative flex min-h-screen flex-col items-center justify-center gap-6 bg-neutral-50 px-4 dark:bg-neutral-950">
+      <Link
+        to="/"
+        className="absolute left-4 top-4 flex items-center gap-1.5 text-sm text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-100"
+      >
+        <ArrowLeft className="h-4 w-4" /> Back
+      </Link>
+      <Link to="/" className="flex items-center gap-2 text-neutral-900 dark:text-neutral-100">
         <GraduationCap className="h-6 w-6" />
         <span className="text-lg font-semibold">Study Tracker</span>
-      </div>
+      </Link>
       <Card className="w-full max-w-sm">
         <h1 className="mb-4 text-lg font-semibold">Create an account</h1>
         {signupError && <div className="mb-3"><ErrorBanner message={signupError} /></div>}
