@@ -162,13 +162,14 @@ def get_overdue(db: Session, user_id: int) -> OverdueSummary:
     )
 
 
-def get_heatmap(db: Session, user_id: int, days: int) -> list[HeatmapCell]:
-    today = date.today()
-    start = today - timedelta(days=days - 1)
+def get_heatmap_year(db: Session, user_id: int, year: int) -> list[HeatmapCell]:
+    start = date(year, 1, 1)
+    end = date(year, 12, 31)
+    days = (end - start).days + 1
 
     rows = db.execute(
         select(StudySession.session_date, func.sum(StudySession.duration_minutes))
-        .where(StudySession.user_id == user_id, StudySession.session_date >= start)
+        .where(StudySession.user_id == user_id, StudySession.session_date >= start, StudySession.session_date <= end)
         .group_by(StudySession.session_date)
     ).all()
     minutes_by_date = {d: m for d, m in rows}
@@ -177,3 +178,13 @@ def get_heatmap(db: Session, user_id: int, days: int) -> list[HeatmapCell]:
         HeatmapCell(date=start + timedelta(days=i), minutes=minutes_by_date.get(start + timedelta(days=i), 0))
         for i in range(days)
     ]
+
+
+def get_available_years(db: Session, user_id: int) -> list[int]:
+    years = set(
+        db.scalars(
+            select(func.extract("year", StudySession.session_date)).where(StudySession.user_id == user_id).distinct()
+        )
+    )
+    years.add(date.today().year)
+    return sorted((int(y) for y in years), reverse=True)

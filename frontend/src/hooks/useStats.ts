@@ -21,6 +21,10 @@ export function useOverdueStats() {
   return useQuery({ queryKey: ["stats", "overdue"], queryFn: statsApi.overdue });
 }
 
-export function useHeatmapStats(days = 182) {
-  return useQuery({ queryKey: ["stats", "heatmap", days], queryFn: () => statsApi.heatmap(days) });
+export function useHeatmapStats(year?: number) {
+  return useQuery({ queryKey: ["stats", "heatmap", year ?? "current"], queryFn: () => statsApi.heatmap(year) });
+}
+
+export function useHeatmapYears() {
+  return useQuery({ queryKey: ["stats", "heatmap", "years"], queryFn: statsApi.heatmapYears });
 }

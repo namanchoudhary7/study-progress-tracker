@@ -46,7 +46,11 @@ def overdue(db: Session = Depends(get_db), current_user: User = Depends(get_curr
 
 @router.get("/heatmap", response_model=list[HeatmapCell])
 def heatmap(
-    days: int = 182, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)
+    year: int | None = None, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)
 ) -> list[HeatmapCell]:
-    days = max(1, min(days, 366))
-    return stats_service.get_heatmap(db, current_user.id, days)
+    return stats_service.get_heatmap_year(db, current_user.id, year or date.today().year)
+
+
+@router.get("/heatmap/years", response_model=list[int])
+def heatmap_years(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)) -> list[int]:
+    return stats_service.get_available_years(db, current_user.id)

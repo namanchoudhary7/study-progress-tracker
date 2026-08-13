@@ -50,5 +50,6 @@ export const statsApi = {
     api.get<TimeSpentPoint[]>(`/stats/time-spent?group_by=${groupBy}`),
   streaks: () => api.get<StreakStats>("/stats/streaks"),
   overdue: () => api.get<OverdueSummary>("/stats/overdue"),
-  heatmap: (days = 182) => api.get<HeatmapCell[]>(`/stats/heatmap?days=${days}`),
+  heatmap: (year?: number) => api.get<HeatmapCell[]>(`/stats/heatmap${year ? `?year=${year}` : ""}`),
+  heatmapYears: () => api.get<number[]>("/stats/heatmap/years"),
 };
