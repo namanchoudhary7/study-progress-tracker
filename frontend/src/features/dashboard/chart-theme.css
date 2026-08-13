@@ -1,0 +1,25 @@
+.viz-root {
+  --series-1: #2a78d6;
+  --grid: #e1e0d9;
+  --axis: #c3c2b7;
+  --ink-muted: #898781;
+  --surface: #fcfcfb;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .viz-root {
+    --series-1: #3987e5;
+    --grid: #2c2c2a;
+    --axis: #383835;
+    --ink-muted: #898781;
+    --surface: #1a1a19;
+  }
+}
+
+:root[data-theme="dark"] .viz-root {
+  --series-1: #3987e5;
+  --grid: #2c2c2a;
+  --axis: #383835;
+  --ink-muted: #898781;
+  --surface: #1a1a19;
+}

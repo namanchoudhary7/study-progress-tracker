@@ -1,0 +1,12 @@
+import { api } from "../lib/apiClient";
+import type { Topic } from "./types";
+
+export const topicsApi = {
+  list: (subjectId?: number) =>
+    api.get<Topic[]>(subjectId ? `/topics?subject_id=${subjectId}` : "/topics"),
+  get: (id: number) => api.get<Topic>(`/topics/${id}`),
+  create: (data: Partial<Topic> & { subject_id: number; name: string }) =>
+    api.post<Topic>("/topics", data),
+  update: (id: number, data: Partial<Topic>) => api.patch<Topic>(`/topics/${id}`, data),
+  remove: (id: number) => api.delete(`/topics/${id}`),
+};
