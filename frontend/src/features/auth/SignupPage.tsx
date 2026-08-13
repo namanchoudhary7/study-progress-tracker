@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, GraduationCap } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import { BrandLogo } from "../../components/BrandLogo";
 import { Card } from "../../components/Card";
 import { ErrorBanner } from "../../components/ErrorBanner";
 import { Button } from "../../components/ui/Button";
@@ -14,10 +15,17 @@ export function SignupPage() {
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [mismatchError, setMismatchError] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (password !== confirmPassword) {
+      setMismatchError(true);
+      return;
+    }
+    setMismatchError(false);
     setSubmitting(true);
     try {
       await signup(email, username, password);
@@ -37,13 +45,11 @@ export function SignupPage() {
       >
         <ArrowLeft className="h-4 w-4" /> Back
       </Link>
-      <Link to="/" className="flex items-center gap-2 text-neutral-900 dark:text-neutral-100">
-        <GraduationCap className="h-6 w-6" />
-        <span className="text-lg font-semibold">Study Tracker</span>
-      </Link>
+      <BrandLogo />
       <Card className="w-full max-w-sm">
         <h1 className="mb-4 text-lg font-semibold">Create an account</h1>
         {signupError && <div className="mb-3"><ErrorBanner message={signupError} /></div>}
+        {mismatchError && <div className="mb-3"><ErrorBanner message="Passwords do not match" /></div>}
         <form onSubmit={handleSubmit} className="space-y-3">
           <Input
             type="email"
@@ -73,6 +79,15 @@ export function SignupPage() {
             placeholder="Password (min 8 characters)"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+          />
+          <Input
+            type="password"
+            required
+            minLength={8}
+            className="w-full"
+            placeholder="Confirm password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
           />
           <Button type="submit" variant="primary" disabled={submitting} className="w-full">
             Sign up

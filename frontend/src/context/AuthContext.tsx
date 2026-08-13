@@ -7,7 +7,7 @@ interface AuthContextValue {
   user: AuthUser | null | undefined;
   isLoading: boolean;
   isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<AuthUser>;
+  login: (identifier: string, password: string) => Promise<AuthUser>;
   signup: (email: string, username: string, password: string) => Promise<AuthUser>;
   logout: () => Promise<void>;
   loginError: string | null;
@@ -31,8 +31,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setCsrfToken(meQuery.data?.csrf_token ?? null);
   }, [meQuery.data]);
 
+  useEffect(() => {
+    function handlePageShow(event: PageTransitionEvent) {
+      if (event.persisted) {
+        qc.invalidateQueries({ queryKey: ME_KEY });
+      }
+    }
+    window.addEventListener("pageshow", handlePageShow);
+    return () => window.removeEventListener("pageshow", handlePageShow);
+  }, [qc]);
+
   const loginMutation = useMutation({
-    mutationFn: ({ email, password }: { email: string; password: string }) => authApi.login(email, password),
+    mutationFn: ({ identifier, password }: { identifier: string; password: string }) =>
+      authApi.login(identifier, password),
     onSuccess: (user) => {
       setCsrfToken(user.csrf_token);
       qc.setQueryData(ME_KEY, user);
@@ -61,7 +72,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     user: meQuery.data ?? (meQuery.isError ? null : undefined),
     isLoading: meQuery.isLoading,
     isAuthenticated: !!meQuery.data,
-    login: (email, password) => loginMutation.mutateAsync({ email, password }),
+    login: (identifier, password) => loginMutation.mutateAsync({ identifier, password }),
     signup: (email, username, password) => signupMutation.mutateAsync({ email, username, password }),
     logout: () => logoutMutation.mutateAsync(),
     loginError: loginMutation.error ? loginMutation.error.message : null,

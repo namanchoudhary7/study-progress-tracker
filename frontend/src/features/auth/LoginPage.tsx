@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, GraduationCap } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import { BrandLogo } from "../../components/BrandLogo";
 import { Card } from "../../components/Card";
 import { ErrorBanner } from "../../components/ErrorBanner";
 import { Button } from "../../components/ui/Button";
@@ -11,7 +12,7 @@ import { authApi } from "../../api/auth";
 export function LoginPage() {
   const { login, loginError } = useAuth();
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -19,7 +20,7 @@ export function LoginPage() {
     e.preventDefault();
     setSubmitting(true);
     try {
-      await login(email, password);
+      await login(identifier, password);
       navigate("/dashboard");
     } catch {
       // error surfaced via loginError
@@ -36,21 +37,18 @@ export function LoginPage() {
       >
         <ArrowLeft className="h-4 w-4" /> Back
       </Link>
-      <Link to="/" className="flex items-center gap-2 text-neutral-900 dark:text-neutral-100">
-        <GraduationCap className="h-6 w-6" />
-        <span className="text-lg font-semibold">Study Tracker</span>
-      </Link>
+      <BrandLogo />
       <Card className="w-full max-w-sm">
         <h1 className="mb-4 text-lg font-semibold">Sign in</h1>
         {loginError && <div className="mb-3"><ErrorBanner message={loginError} /></div>}
         <form onSubmit={handleSubmit} className="space-y-3">
           <Input
-            type="email"
+            type="text"
             required
             className="w-full"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Email or username"
+            value={identifier}
+            onChange={(e) => setIdentifier(e.target.value)}
           />
           <Input
             type="password"

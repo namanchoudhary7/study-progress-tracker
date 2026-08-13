@@ -15,7 +15,7 @@ export const authApi = {
   me: () => api.get<AuthUser>("/auth/me"),
   signup: (email: string, username: string, password: string) =>
     api.post<AuthUser>("/auth/signup", { email, username, password }),
-  login: (email: string, password: string) => api.post<AuthUser>("/auth/login", { email, password }),
+  login: (identifier: string, password: string) => api.post<AuthUser>("/auth/login", { identifier, password }),
   logout: () => api.post<void>("/auth/logout", {}),
   googleLoginUrl: `${API_URL}/auth/google/login`,
 };

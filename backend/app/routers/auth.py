@@ -2,7 +2,7 @@ import jwt
 from authlib.integrations.starlette_client import OAuth
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from fastapi.responses import RedirectResponse
-from sqlalchemy import select
+from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
@@ -60,7 +60,9 @@ def signup(payload: UserCreate, response: Response, db: Session = Depends(get_db
 
 @router.post("/login", response_model=AuthResponse)
 def login(payload: UserLogin, response: Response, db: Session = Depends(get_db)) -> AuthResponse:
-    user = db.scalar(select(User).where(User.email == payload.email))
+    user = db.scalar(
+        select(User).where(or_(User.email == payload.identifier, User.username == payload.identifier))
+    )
     if user is None or user.hashed_password is None:
         raise HTTPException(status_code=401, detail="Invalid email or password")
     if not verify_password(payload.password, user.hashed_password):

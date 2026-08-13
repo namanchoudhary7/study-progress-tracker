@@ -5,6 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../hooks/useTheme";
 import { useLastSynced } from "../hooks/useLastSynced";
 import { downloadExport } from "../api/export";
+import { BrandLogo } from "./BrandLogo";
 import { IconButton } from "./ui/IconButton";
 
 const navItems = [
@@ -46,7 +47,7 @@ export function Layout() {
   const sidebarContent = (
     <>
       <div className="px-4 py-4">
-        <span className="text-lg font-semibold">Study Tracker</span>
+        <BrandLogo />
       </div>
       <nav className="flex-1 space-y-1 px-2">
         {navItems.map((item) => (
@@ -74,9 +75,10 @@ export function Layout() {
           <IconButton icon={LogOut} label="Log out" onClick={handleLogout} />
         </div>
         {user && (
-          <p className="truncate px-2 text-xs text-neutral-500" title={user.email}>
-            {user.email}
-          </p>
+          <div className="truncate px-2" title={user.email}>
+            <p className="truncate text-sm font-medium text-neutral-900 dark:text-neutral-100">{user.username}</p>
+            <p className="truncate text-xs text-neutral-500">{user.email}</p>
+          </div>
         )}
       </div>
     </>

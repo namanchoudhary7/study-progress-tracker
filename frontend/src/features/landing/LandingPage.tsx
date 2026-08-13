@@ -1,5 +1,6 @@
 import { Navigate, Link } from "react-router-dom";
-import { BarChart3, BookOpen, Flame, GraduationCap, RotateCcw, Target } from "lucide-react";
+import { BarChart3, BookOpen, Flame, RotateCcw, Target } from "lucide-react";
+import { BrandLogo } from "../../components/BrandLogo";
 import { Button } from "../../components/ui/Button";
 import { useAuth } from "../../context/AuthContext";
 
@@ -37,10 +38,7 @@ export function LandingPage() {
     <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950">
       <header className="border-b border-neutral-200 dark:border-neutral-800">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
-          <div className="flex items-center gap-2 text-neutral-900 dark:text-neutral-100">
-            <GraduationCap className="h-6 w-6" />
-            <span className="text-lg font-semibold">Study Tracker</span>
-          </div>
+          <BrandLogo />
           <div className="flex items-center gap-2">
             <Link to="/login">
               <Button variant="ghost">Sign in</Button>
