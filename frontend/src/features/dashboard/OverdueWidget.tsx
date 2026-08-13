@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { AlertTriangle, CheckCircle2 } from "lucide-react";
 import { useOverdueStats } from "../../hooks/useStats";
 
 export function OverdueWidget() {
@@ -9,7 +10,11 @@ export function OverdueWidget() {
 
   const nothingOverdue = data.overdue_goals.length === 0 && data.due_reviews_count === 0;
   if (nothingOverdue) {
-    return <p className="text-sm text-emerald-600 dark:text-emerald-400">Nothing overdue. Nice work.</p>;
+    return (
+      <p className="flex items-center gap-2 text-sm text-emerald-600 dark:text-emerald-400">
+        <CheckCircle2 className="h-4 w-4" /> Nothing overdue. Nice work.
+      </p>
+    );
   }
 
   return (
@@ -22,8 +27,8 @@ export function OverdueWidget() {
         </p>
       )}
       {data.overdue_goals.map((g) => (
-        <p key={g.id} className="text-red-600 dark:text-red-400">
-          Overdue: {g.title} (was due {g.target_date})
+        <p key={g.id} className="flex items-center gap-2 text-red-600 dark:text-red-400">
+          <AlertTriangle className="h-4 w-4 shrink-0" /> Overdue: {g.title} (was due {g.target_date})
         </p>
       ))}
     </div>

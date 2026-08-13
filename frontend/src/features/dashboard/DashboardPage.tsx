@@ -1,6 +1,8 @@
 import { useState } from "react";
+import { BookOpen, CheckSquare, Clock, Flame } from "lucide-react";
 import { Card } from "../../components/Card";
 import { ErrorBanner } from "../../components/ErrorBanner";
+import { Button } from "../../components/ui/Button";
 import { useOverviewStats, useStreakStats } from "../../hooks/useStats";
 import { StatTile } from "./StatTile";
 import { CompletionChart } from "./CompletionChart";
@@ -15,19 +17,19 @@ export function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-xl font-semibold">Dashboard</h1>
-
       {isError && <ErrorBanner message={error.message} onRetry={() => refetch()} />}
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <StatTile label="Subjects" value={String(overview?.total_subjects ?? "—")} />
+        <StatTile icon={BookOpen} label="Subjects" value={String(overview?.total_subjects ?? "—")} />
         <StatTile
+          icon={CheckSquare}
           label="Topics done"
           value={`${overview?.topics_done ?? 0}/${overview?.total_topics ?? 0}`}
           sub={overview ? `${overview.completion_pct}% complete` : undefined}
         />
-        <StatTile label="Total time studied" value={`${overview?.total_minutes ?? 0} min`} />
+        <StatTile icon={Clock} label="Total time studied" value={`${overview?.total_minutes ?? 0} min`} />
         <StatTile
+          icon={Flame}
           label="Current streak"
           value={`${streaks?.current_streak ?? 0} day${streaks?.current_streak === 1 ? "" : "s"}`}
           sub={streaks ? `Longest: ${streaks.longest_streak}` : undefined}
@@ -42,19 +44,16 @@ export function DashboardPage() {
         <Card>
           <div className="mb-2 flex items-center justify-between">
             <h2 className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Time spent</h2>
-            <div className="flex overflow-hidden rounded border border-neutral-300 text-xs dark:border-neutral-700">
+            <div className="flex gap-1">
               {(["day", "week"] as const).map((opt) => (
-                <button
+                <Button
                   key={opt}
+                  size="sm"
+                  variant={timeSpentGroupBy === opt ? "primary" : "secondary"}
                   onClick={() => setTimeSpentGroupBy(opt)}
-                  className={
-                    timeSpentGroupBy === opt
-                      ? "bg-blue-600 px-2 py-0.5 text-white"
-                      : "px-2 py-0.5 hover:bg-neutral-100 dark:hover:bg-neutral-800"
-                  }
                 >
                   {opt === "day" ? "Day" : "Week"}
-                </button>
+                </Button>
               ))}
             </div>
           </div>

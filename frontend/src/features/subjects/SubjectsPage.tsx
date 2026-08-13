@@ -1,7 +1,11 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { BookOpen, Pencil, Trash2 } from "lucide-react";
 import { Card } from "../../components/Card";
 import { ErrorBanner } from "../../components/ErrorBanner";
+import { Button } from "../../components/ui/Button";
+import { IconButton } from "../../components/ui/IconButton";
+import { Input } from "../../components/ui/Input";
 import { useCreateSubject, useDeleteSubject, useSubjects, useUpdateSubject } from "../../hooks/useSubjects";
 import { useTopics } from "../../hooks/useTopics";
 import type { Subject } from "../../api/types";
@@ -43,25 +47,21 @@ function SubjectRow({ subject }: { subject: Subject }) {
             type="color"
             value={color}
             onChange={(e) => setColor(e.target.value)}
-            className="h-8 w-8 cursor-pointer rounded border border-neutral-300 dark:border-neutral-700"
+            className="h-8 w-8 cursor-pointer rounded-lg border border-neutral-300 dark:border-neutral-700"
           />
-          <input
-            className="rounded border border-neutral-300 px-2 py-1 text-sm dark:border-neutral-700 dark:bg-neutral-900"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-          <input
-            className="flex-1 rounded border border-neutral-300 px-2 py-1 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+          <Input value={name} onChange={(e) => setName(e.target.value)} />
+          <Input
+            className="flex-1"
             placeholder="Description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
           />
-          <button type="submit" className="rounded bg-blue-600 px-3 py-1 text-xs font-medium text-white hover:bg-blue-700">
+          <Button type="submit" variant="primary" size="sm">
             Save
-          </button>
-          <button type="button" onClick={() => setEditing(false)} className="rounded border border-neutral-300 px-3 py-1 text-xs hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-800">
+          </Button>
+          <Button type="button" variant="secondary" size="sm" onClick={() => setEditing(false)}>
             Cancel
-          </button>
+          </Button>
         </form>
       </Card>
     );
@@ -86,12 +86,8 @@ function SubjectRow({ subject }: { subject: Subject }) {
           <span className="text-sm text-neutral-500">
             {done}/{total} topics ({pct}%)
           </span>
-          <button onClick={() => setEditing(true)} className="rounded border border-neutral-300 px-2 py-1 text-xs hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-800">
-            Edit
-          </button>
-          <button onClick={handleDelete} className="rounded border border-red-300 px-2 py-1 text-xs text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950/40">
-            Delete
-          </button>
+          <IconButton icon={Pencil} label="Edit subject" onClick={() => setEditing(true)} />
+          <IconButton icon={Trash2} label="Delete subject" variant="danger" onClick={handleDelete} />
         </div>
       </div>
     </Card>
@@ -116,41 +112,34 @@ export function SubjectsPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-xl font-semibold">Subjects</h1>
-
-      <form onSubmit={handleCreate} className="flex flex-wrap items-center gap-2">
-        <input
-          type="color"
-          value={color}
-          onChange={(e) => setColor(e.target.value)}
-          className="h-8 w-8 cursor-pointer rounded border border-neutral-300 dark:border-neutral-700"
-          title="Subject color"
-        />
-        <input
-          className="rounded border border-neutral-300 px-3 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
-          placeholder="Subject name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-        <input
-          className="rounded border border-neutral-300 px-3 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
-          placeholder="Description (optional)"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-        />
-        <button
-          type="submit"
-          className="rounded bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
-          disabled={createSubject.isPending}
-        >
-          Add subject
-        </button>
-      </form>
+      <Card>
+        <form onSubmit={handleCreate} className="flex flex-wrap items-center gap-2">
+          <input
+            type="color"
+            value={color}
+            onChange={(e) => setColor(e.target.value)}
+            className="h-8 w-8 cursor-pointer rounded-lg border border-neutral-300 dark:border-neutral-700"
+            title="Subject color"
+          />
+          <Input placeholder="Subject name" value={name} onChange={(e) => setName(e.target.value)} />
+          <Input
+            placeholder="Description (optional)"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
+          <Button type="submit" variant="primary" disabled={createSubject.isPending}>
+            Add subject
+          </Button>
+        </form>
+      </Card>
 
       {isError && <ErrorBanner message={error.message} onRetry={() => refetch()} />}
       {isLoading && <p className="text-sm text-neutral-500">Loading…</p>}
       {!isLoading && !isError && subjects?.length === 0 && (
-        <p className="text-sm text-neutral-500">No subjects yet — add one above to get started.</p>
+        <div className="flex flex-col items-center gap-2 py-10 text-center text-sm text-neutral-500">
+          <BookOpen className="h-8 w-8 text-neutral-300 dark:text-neutral-700" />
+          No subjects yet — add one above to get started.
+        </div>
       )}
       <div className="space-y-3">
         {subjects?.map((s) => <SubjectRow key={s.id} subject={s} />)}

@@ -1,6 +1,10 @@
 import { useState } from "react";
+import { Clock, History, Pause, Play, Square } from "lucide-react";
 import { Card } from "../../components/Card";
 import { ErrorBanner } from "../../components/ErrorBanner";
+import { Button } from "../../components/ui/Button";
+import { Input } from "../../components/ui/Input";
+import { Select } from "../../components/ui/Select";
 import { useSubjects } from "../../hooks/useSubjects";
 import { useTopics } from "../../hooks/useTopics";
 import { useCreateSession, useSessions, useUpdateSession } from "../../hooks/useSessions";
@@ -27,25 +31,17 @@ function SessionRow({ session, subjectName }: { session: StudySession; subjectNa
         <span>{session.session_date} · {subjectName}</span>
         <div className="flex items-center gap-2">
           <span className="text-neutral-500">{session.duration_minutes} min</span>
-          <button
-            onClick={() => setEditing((e) => !e)}
-            className="rounded border border-neutral-300 px-2 py-0.5 text-xs hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-800"
-          >
+          <Button size="sm" onClick={() => setEditing((e) => !e)}>
             {editing ? "Close" : session.notes ? "Edit note" : "Add note"}
-          </button>
+          </Button>
         </div>
       </div>
       {editing ? (
         <form onSubmit={handleSave} className="mt-2 flex gap-2">
-          <input
-            className="flex-1 rounded border border-neutral-300 px-2 py-1 text-sm dark:border-neutral-700 dark:bg-neutral-900"
-            placeholder="Notes"
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-          />
-          <button type="submit" className="rounded bg-blue-600 px-3 py-1 text-xs font-medium text-white hover:bg-blue-700">
+          <Input className="flex-1" placeholder="Notes" value={notes} onChange={(e) => setNotes(e.target.value)} />
+          <Button type="submit" variant="primary" size="sm">
             Save
-          </button>
+          </Button>
         </form>
       ) : (
         session.notes && <p className="mt-1 text-neutral-500">{session.notes}</p>
@@ -92,37 +88,35 @@ export function SessionsPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-xl font-semibold">Log a study session</h1>
-
       <Card>
-        <div className="mb-3 flex items-center gap-3 rounded border border-neutral-200 bg-neutral-50 px-3 py-2 text-sm dark:border-neutral-800 dark:bg-neutral-950">
+        <div className="mb-3 flex flex-wrap items-center gap-3 rounded-lg border border-neutral-200 bg-neutral-50 px-3 py-2 text-sm dark:border-neutral-800 dark:bg-neutral-950">
+          <Clock className="h-4 w-4 text-neutral-500" />
           <span className="font-medium">Timer:</span>
           <span className="tabular-nums text-neutral-600 dark:text-neutral-400">{stopwatch.elapsedLabel}</span>
           {stopwatch.isRunning ? (
             <>
-              <button type="button" onClick={stopwatch.pause} className="rounded border border-neutral-300 px-2 py-0.5 text-xs hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-800">
+              <Button size="sm" icon={Pause} onClick={stopwatch.pause}>
                 Pause
-              </button>
-              <button type="button" onClick={handleStopTimer} className="rounded bg-blue-600 px-2 py-0.5 text-xs font-medium text-white hover:bg-blue-700">
+              </Button>
+              <Button size="sm" variant="primary" icon={Square} onClick={handleStopTimer}>
                 Stop &amp; use time
-              </button>
+              </Button>
             </>
           ) : (
             <>
-              <button type="button" onClick={stopwatch.start} className="rounded border border-neutral-300 px-2 py-0.5 text-xs hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-800">
+              <Button size="sm" icon={Play} onClick={stopwatch.start}>
                 {stopwatch.elapsedMinutes > 0 ? "Resume" : "Start timer"}
-              </button>
+              </Button>
               {stopwatch.elapsedMinutes > 0 && (
-                <button type="button" onClick={handleStopTimer} className="rounded bg-blue-600 px-2 py-0.5 text-xs font-medium text-white hover:bg-blue-700">
+                <Button size="sm" variant="primary" icon={Square} onClick={handleStopTimer}>
                   Use time
-                </button>
+                </Button>
               )}
             </>
           )}
         </div>
         <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-3 sm:grid-cols-5">
-          <select
-            className="rounded border border-neutral-300 px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+          <Select
             value={subjectId}
             onChange={(e) => { setSubjectId(e.target.value ? Number(e.target.value) : ""); setTopicId(""); }}
           >
@@ -130,9 +124,8 @@ export function SessionsPage() {
             {subjects?.map((s) => (
               <option key={s.id} value={s.id}>{s.name}</option>
             ))}
-          </select>
-          <select
-            className="rounded border border-neutral-300 px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+          </Select>
+          <Select
             value={topicId}
             onChange={(e) => setTopicId(e.target.value ? Number(e.target.value) : "")}
             disabled={!subjectId}
@@ -141,41 +134,36 @@ export function SessionsPage() {
             {topics?.map((t) => (
               <option key={t.id} value={t.id}>{t.name}</option>
             ))}
-          </select>
-          <input
-            type="date"
-            className="rounded border border-neutral-300 px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-          />
-          <input
+          </Select>
+          <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+          <Input
             type="number"
             min="1"
-            className="rounded border border-neutral-300 px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
             placeholder="Minutes"
             value={minutes}
             onChange={(e) => setMinutes(e.target.value)}
           />
-          <input
-            className="rounded border border-neutral-300 px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
-            placeholder="Notes (optional)"
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-          />
-          <button
+          <Input placeholder="Notes (optional)" value={notes} onChange={(e) => setNotes(e.target.value)} />
+          <Button
             type="submit"
-            className="col-span-2 rounded bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 sm:col-span-5"
+            variant="primary"
+            className="col-span-2 sm:col-span-5"
             disabled={createSession.isPending}
           >
             Log session
-          </button>
+          </Button>
         </form>
       </Card>
 
       <h2 className="text-lg font-medium">Recent sessions</h2>
       {isError && <ErrorBanner message={error.message} onRetry={() => refetch()} />}
       {isLoading && <p className="text-sm text-neutral-500">Loading…</p>}
-      {!isLoading && !isError && sessions?.length === 0 && <p className="text-sm text-neutral-500">No sessions logged yet.</p>}
+      {!isLoading && !isError && sessions?.length === 0 && (
+        <div className="flex flex-col items-center gap-2 py-10 text-center text-sm text-neutral-500">
+          <History className="h-8 w-8 text-neutral-300 dark:text-neutral-700" />
+          No sessions logged yet.
+        </div>
+      )}
       <div className="space-y-2">
         {sessions?.map((s) => (
           <SessionRow key={s.id} session={s} subjectName={subjectName(s.subject_id)} />

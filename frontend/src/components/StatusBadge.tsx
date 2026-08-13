@@ -1,4 +1,5 @@
 import type { TopicStatus, GoalStatus } from "../api/types";
+import { Badge } from "./ui/Badge";
 
 const topicStyles: Record<TopicStatus, string> = {
   todo: "bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300",
@@ -13,13 +14,9 @@ const goalStyles: Record<GoalStatus, string> = {
 };
 
 export function TopicStatusBadge({ status }: { status: TopicStatus }) {
-  return (
-    <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${topicStyles[status]}`}>
-      {status.replace("_", " ")}
-    </span>
-  );
+  return <Badge className={topicStyles[status]}>{status.replace("_", " ")}</Badge>;
 }
 
 export function GoalStatusBadge({ status }: { status: GoalStatus }) {
-  return <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${goalStyles[status]}`}>{status}</span>;
+  return <Badge className={goalStyles[status]}>{status}</Badge>;
 }

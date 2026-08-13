@@ -1,7 +1,13 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
+import { ListChecks, Pencil, Trash2 } from "lucide-react";
 import { Card } from "../../components/Card";
 import { TopicStatusBadge } from "../../components/StatusBadge";
+import { Button } from "../../components/ui/Button";
+import { IconButton } from "../../components/ui/IconButton";
+import { Input } from "../../components/ui/Input";
+import { Select } from "../../components/ui/Select";
+import { Textarea } from "../../components/ui/Textarea";
 import { useSubjects } from "../../hooks/useSubjects";
 import { useBulkCreateTopics, useCreateTopic, useDeleteTopic, useTopics, useUpdateTopic } from "../../hooks/useTopics";
 import type { Topic, TopicStatus } from "../../api/types";
@@ -30,23 +36,14 @@ function TopicRow({ topic }: { topic: Topic }) {
     return (
       <Card>
         <form onSubmit={handleSave} className="flex flex-wrap items-center gap-2">
-          <input
-            className="rounded border border-neutral-300 px-2 py-1 text-sm dark:border-neutral-700 dark:bg-neutral-900"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-          <input
-            className="flex-1 rounded border border-neutral-300 px-2 py-1 text-sm dark:border-neutral-700 dark:bg-neutral-900"
-            placeholder="Notes"
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-          />
-          <button type="submit" className="rounded bg-blue-600 px-3 py-1 text-xs font-medium text-white hover:bg-blue-700">
+          <Input value={name} onChange={(e) => setName(e.target.value)} />
+          <Input className="flex-1" placeholder="Notes" value={notes} onChange={(e) => setNotes(e.target.value)} />
+          <Button type="submit" variant="primary" size="sm">
             Save
-          </button>
-          <button type="button" onClick={() => setEditing(false)} className="rounded border border-neutral-300 px-3 py-1 text-xs hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-800">
+          </Button>
+          <Button type="button" variant="secondary" size="sm" onClick={() => setEditing(false)}>
             Cancel
-          </button>
+          </Button>
         </form>
       </Card>
     );
@@ -60,8 +57,8 @@ function TopicRow({ topic }: { topic: Topic }) {
       </div>
       <div className="flex items-center gap-2">
         <TopicStatusBadge status={topic.status} />
-        <select
-          className="rounded border border-neutral-300 bg-white px-2 py-1 text-xs dark:border-neutral-700 dark:bg-neutral-900"
+        <Select
+          className="py-1 text-xs"
           value={topic.status}
           onChange={(e) => updateTopic.mutate({ id: topic.id, data: { status: e.target.value as TopicStatus } })}
         >
@@ -70,13 +67,9 @@ function TopicRow({ topic }: { topic: Topic }) {
               {s.replace("_", " ")}
             </option>
           ))}
-        </select>
-        <button onClick={() => setEditing(true)} className="rounded border border-neutral-300 px-2 py-1 text-xs hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-800">
-          Edit
-        </button>
-        <button onClick={handleDelete} className="rounded border border-red-300 px-2 py-1 text-xs text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950/40">
-          Delete
-        </button>
+        </Select>
+        <IconButton icon={Pencil} label="Edit topic" onClick={() => setEditing(true)} />
+        <IconButton icon={Trash2} label="Delete topic" variant="danger" onClick={handleDelete} />
       </div>
     </Card>
   );
@@ -122,65 +115,47 @@ export function SubjectDetailPage() {
         </div>
       </div>
 
-      <form onSubmit={handleCreate} className="flex gap-2">
-        <input
-          className="rounded border border-neutral-300 px-3 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
-          placeholder="New topic name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-        <button
-          type="submit"
-          className="rounded bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
-          disabled={createTopic.isPending}
-        >
-          Add topic
-        </button>
-        <button
-          type="button"
-          onClick={() => setBulkOpen((o) => !o)}
-          className="rounded border border-neutral-300 px-3 py-1.5 text-sm hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-800"
-        >
-          Bulk add
-        </button>
-      </form>
+      <Card>
+        <form onSubmit={handleCreate} className="flex gap-2">
+          <Input placeholder="New topic name" value={name} onChange={(e) => setName(e.target.value)} />
+          <Button type="submit" variant="primary" disabled={createTopic.isPending}>
+            Add topic
+          </Button>
+          <Button type="button" variant="secondary" onClick={() => setBulkOpen((o) => !o)}>
+            Bulk add
+          </Button>
+        </form>
 
-      {bulkOpen && (
-        <Card>
-          <form onSubmit={handleBulkCreate} className="space-y-2">
+        {bulkOpen && (
+          <form onSubmit={handleBulkCreate} className="mt-4 space-y-2 border-t border-neutral-200 pt-4 dark:border-neutral-800">
             <label className="block text-sm text-neutral-500">
               One topic per line — paste a syllabus or table of contents
             </label>
-            <textarea
-              className="w-full rounded border border-neutral-300 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+            <Textarea
+              className="w-full"
               rows={6}
               placeholder={"Introduction\nChapter 1: Basics\nChapter 2: Advanced Topics"}
               value={bulkText}
               onChange={(e) => setBulkText(e.target.value)}
             />
             <div className="flex gap-2">
-              <button
-                type="submit"
-                className="rounded bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
-                disabled={bulkCreateTopics.isPending}
-              >
+              <Button type="submit" variant="primary" disabled={bulkCreateTopics.isPending}>
                 Add topics
-              </button>
-              <button
-                type="button"
-                onClick={() => setBulkOpen(false)}
-                className="rounded border border-neutral-300 px-3 py-1.5 text-sm hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-800"
-              >
+              </Button>
+              <Button type="button" variant="secondary" onClick={() => setBulkOpen(false)}>
                 Cancel
-              </button>
+              </Button>
             </div>
           </form>
-        </Card>
-      )}
+        )}
+      </Card>
 
       {isLoading && <p className="text-sm text-neutral-500">Loading…</p>}
       {!isLoading && topics?.length === 0 && (
-        <p className="text-sm text-neutral-500">No topics yet — add one above.</p>
+        <div className="flex flex-col items-center gap-2 py-10 text-center text-sm text-neutral-500">
+          <ListChecks className="h-8 w-8 text-neutral-300 dark:text-neutral-700" />
+          No topics yet — add one above.
+        </div>
       )}
       <div className="space-y-2">
         {topics?.map((topic) => <TopicRow key={topic.id} topic={topic} />)}

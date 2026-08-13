@@ -1,7 +1,11 @@
 import { useState } from "react";
+import { Target } from "lucide-react";
 import { Card } from "../../components/Card";
 import { ErrorBanner } from "../../components/ErrorBanner";
 import { GoalStatusBadge } from "../../components/StatusBadge";
+import { Button } from "../../components/ui/Button";
+import { Input } from "../../components/ui/Input";
+import { Select } from "../../components/ui/Select";
 import { useSubjects } from "../../hooks/useSubjects";
 import { useTopics } from "../../hooks/useTopics";
 import { useCreateGoal, useGoals, useUpdateGoal } from "../../hooks/useGoals";
@@ -60,12 +64,9 @@ export function GoalsPage() {
         <div className="flex items-center gap-2">
           <GoalStatusBadge status={isOverdue(goal) ? "missed" : goal.status} />
           {goal.status === "open" && (
-            <button
-              className="rounded border border-neutral-300 px-2 py-1 text-xs hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-800"
-              onClick={() => updateGoal.mutate({ id: goal.id, data: { status: "completed" } })}
-            >
+            <Button size="sm" onClick={() => updateGoal.mutate({ id: goal.id, data: { status: "completed" } })}>
               Mark complete
-            </button>
+            </Button>
           )}
         </div>
       </Card>
@@ -74,20 +75,16 @@ export function GoalsPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-xl font-semibold">Goals</h1>
-
       <Card>
         <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-3 sm:grid-cols-5">
-          <select
-            className="rounded border border-neutral-300 px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+          <Select
             value={targetType}
             onChange={(e) => { setTargetType(e.target.value as "subject" | "topic"); setSubjectId(""); setTopicId(""); }}
           >
             <option value="subject">Whole subject</option>
             <option value="topic">Specific topic</option>
-          </select>
-          <select
-            className="rounded border border-neutral-300 px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+          </Select>
+          <Select
             value={subjectId}
             onChange={(e) => { setSubjectId(e.target.value ? Number(e.target.value) : ""); setTopicId(""); }}
           >
@@ -95,10 +92,9 @@ export function GoalsPage() {
             {subjects?.map((s) => (
               <option key={s.id} value={s.id}>{s.name}</option>
             ))}
-          </select>
+          </Select>
           {targetType === "topic" && (
-            <select
-              className="rounded border border-neutral-300 px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+            <Select
               value={topicId}
               onChange={(e) => setTopicId(e.target.value ? Number(e.target.value) : "")}
               disabled={!subjectId}
@@ -107,27 +103,18 @@ export function GoalsPage() {
               {topics?.map((t) => (
                 <option key={t.id} value={t.id}>{t.name}</option>
               ))}
-            </select>
+            </Select>
           )}
-          <input
-            className="rounded border border-neutral-300 px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
-            placeholder="Goal title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-          />
-          <input
-            type="date"
-            className="rounded border border-neutral-300 px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
-            value={targetDate}
-            onChange={(e) => setTargetDate(e.target.value)}
-          />
-          <button
+          <Input placeholder="Goal title" value={title} onChange={(e) => setTitle(e.target.value)} />
+          <Input type="date" value={targetDate} onChange={(e) => setTargetDate(e.target.value)} />
+          <Button
             type="submit"
-            className="col-span-2 rounded bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 sm:col-span-5"
+            variant="primary"
+            className="col-span-2 sm:col-span-5"
             disabled={createGoal.isPending}
           >
             Add goal
-          </button>
+          </Button>
         </form>
       </Card>
 
@@ -143,7 +130,12 @@ export function GoalsPage() {
 
       <div className="space-y-2">
         <h2 className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Open</h2>
-        {open.length === 0 && <p className="text-sm text-neutral-500">No open goals.</p>}
+        {open.length === 0 && !isLoading && (
+          <div className="flex flex-col items-center gap-2 py-6 text-center text-sm text-neutral-500">
+            <Target className="h-6 w-6 text-neutral-300 dark:text-neutral-700" />
+            No open goals.
+          </div>
+        )}
         {open.map((g) => <GoalRow key={g.id} goal={g} />)}
       </div>
 
