@@ -66,5 +66,29 @@ A plain-language walkthrough of what this app does and how it's built. Written f
 
 **How it works:** Your choice is remembered in the browser (not tied to your account), so it persists across visits on that device without needing a server round-trip.
 
+## Study Timer
+
+**What it does:** A start/pause/stop timer on the session-log page. Start it before you begin studying, and when you stop it, it fills in the minutes for you — you just confirm (or adjust) and log the session, instead of estimating or doing the math yourself.
+
+**Why it's useful:** Manually guessing how long you studied is inaccurate and easy to skip. A running timer captures the real number with zero mental math, while still letting you review and edit before it's saved.
+
+**How it works:** The timer tracks elapsed time using the actual clock (not a naive counter), so it stays accurate even if you switch away from the tab while it's running.
+
+## Data Export
+
+**What it does:** An "Export data" button downloads everything you've ever entered — every subject, topic, session, goal, and review — as a single file you can keep for yourself.
+
+**Why it's useful:** It's your data; you shouldn't need to ask anyone for a copy of it. It's also a sensible thing to do before making any large change, and useful if you ever want to analyze your own study patterns outside the app.
+
+**How it works:** The button asks the server for everything tied to your account, packages it as one JSON file, and has your browser save it directly — nothing is emailed or stored anywhere else in the process.
+
+## Last Synced Indicator
+
+**What it does:** A small "Updated Xs ago" label in the top bar shows how fresh the data on screen is.
+
+**Why it's useful:** If you have the app open on your phone and your laptop, this gives you a quick, honest signal for whether what you're looking at is current, rather than silently trusting a number that might be stale.
+
+**How it works:** Every time any part of the app successfully fetches data from the server, the timestamp of that fetch updates the label — so it reflects real activity, not a fixed refresh schedule.
+
 ---
 *(A section for future AI Insights will be added once that feature is built.)*

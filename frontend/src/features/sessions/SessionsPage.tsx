@@ -4,6 +4,7 @@ import { ErrorBanner } from "../../components/ErrorBanner";
 import { useSubjects } from "../../hooks/useSubjects";
 import { useTopics } from "../../hooks/useTopics";
 import { useCreateSession, useSessions, useUpdateSession } from "../../hooks/useSessions";
+import { useStopwatch } from "../../hooks/useStopwatch";
 import type { StudySession } from "../../api/types";
 
 function todayISO() {
@@ -63,8 +64,14 @@ export function SessionsPage() {
   const [date, setDate] = useState(todayISO());
   const [minutes, setMinutes] = useState("");
   const [notes, setNotes] = useState("");
+  const stopwatch = useStopwatch();
 
   const { data: topics } = useTopics(subjectId === "" ? undefined : subjectId);
+
+  function handleStopTimer() {
+    setMinutes(String(Math.max(1, stopwatch.elapsedMinutes)));
+    stopwatch.reset();
+  }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -88,6 +95,31 @@ export function SessionsPage() {
       <h1 className="text-xl font-semibold">Log a study session</h1>
 
       <Card>
+        <div className="mb-3 flex items-center gap-3 rounded border border-neutral-200 bg-neutral-50 px-3 py-2 text-sm dark:border-neutral-800 dark:bg-neutral-950">
+          <span className="font-medium">Timer:</span>
+          <span className="tabular-nums text-neutral-600 dark:text-neutral-400">{stopwatch.elapsedLabel}</span>
+          {stopwatch.isRunning ? (
+            <>
+              <button type="button" onClick={stopwatch.pause} className="rounded border border-neutral-300 px-2 py-0.5 text-xs hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-800">
+                Pause
+              </button>
+              <button type="button" onClick={handleStopTimer} className="rounded bg-blue-600 px-2 py-0.5 text-xs font-medium text-white hover:bg-blue-700">
+                Stop &amp; use time
+              </button>
+            </>
+          ) : (
+            <>
+              <button type="button" onClick={stopwatch.start} className="rounded border border-neutral-300 px-2 py-0.5 text-xs hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-800">
+                {stopwatch.elapsedMinutes > 0 ? "Resume" : "Start timer"}
+              </button>
+              {stopwatch.elapsedMinutes > 0 && (
+                <button type="button" onClick={handleStopTimer} className="rounded bg-blue-600 px-2 py-0.5 text-xs font-medium text-white hover:bg-blue-700">
+                  Use time
+                </button>
+              )}
+            </>
+          )}
+        </div>
         <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-3 sm:grid-cols-5">
           <select
             className="rounded border border-neutral-300 px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"

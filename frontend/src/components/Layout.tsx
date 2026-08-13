@@ -1,6 +1,9 @@
+import { useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../hooks/useTheme";
+import { useLastSynced } from "../hooks/useLastSynced";
+import { downloadExport } from "../api/export";
 
 const THEME_ICON = { light: "☀️", dark: "🌙", system: "🖥️" };
 
@@ -16,10 +19,21 @@ export function Layout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const { preference, cyclePreference } = useTheme();
+  const lastSynced = useLastSynced();
+  const [exporting, setExporting] = useState(false);
 
   async function handleLogout() {
     await logout();
     navigate("/login");
+  }
+
+  async function handleExport() {
+    setExporting(true);
+    try {
+      await downloadExport();
+    } finally {
+      setExporting(false);
+    }
   }
 
   return (
@@ -45,7 +59,16 @@ export function Layout() {
             </nav>
           </div>
           <div className="flex items-center gap-3 text-sm text-neutral-500">
+            {lastSynced && <span className="hidden sm:inline">Updated {lastSynced}</span>}
             {user && <span>Signed in as {user.email}</span>}
+            <button
+              onClick={handleExport}
+              disabled={exporting}
+              title="Export all your data as JSON"
+              className="rounded border border-neutral-300 px-2 py-1 text-xs hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-800"
+            >
+              {exporting ? "Exporting…" : "Export data"}
+            </button>
             <button
               onClick={cyclePreference}
               title={`Theme: ${preference}`}
