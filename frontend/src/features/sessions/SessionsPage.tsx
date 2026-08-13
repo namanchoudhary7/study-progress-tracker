@@ -3,10 +3,54 @@ import { Card } from "../../components/Card";
 import { ErrorBanner } from "../../components/ErrorBanner";
 import { useSubjects } from "../../hooks/useSubjects";
 import { useTopics } from "../../hooks/useTopics";
-import { useCreateSession, useSessions } from "../../hooks/useSessions";
+import { useCreateSession, useSessions, useUpdateSession } from "../../hooks/useSessions";
+import type { StudySession } from "../../api/types";
 
 function todayISO() {
   return new Date().toISOString().slice(0, 10);
+}
+
+function SessionRow({ session, subjectName }: { session: StudySession; subjectName: string }) {
+  const updateSession = useUpdateSession();
+  const [editing, setEditing] = useState(false);
+  const [notes, setNotes] = useState(session.notes ?? "");
+
+  function handleSave(e: React.FormEvent) {
+    e.preventDefault();
+    updateSession.mutate({ id: session.id, data: { notes: notes || null } }, { onSuccess: () => setEditing(false) });
+  }
+
+  return (
+    <Card className="text-sm">
+      <div className="flex items-center justify-between">
+        <span>{session.session_date} · {subjectName}</span>
+        <div className="flex items-center gap-2">
+          <span className="text-neutral-500">{session.duration_minutes} min</span>
+          <button
+            onClick={() => setEditing((e) => !e)}
+            className="rounded border border-neutral-300 px-2 py-0.5 text-xs hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-800"
+          >
+            {editing ? "Close" : session.notes ? "Edit note" : "Add note"}
+          </button>
+        </div>
+      </div>
+      {editing ? (
+        <form onSubmit={handleSave} className="mt-2 flex gap-2">
+          <input
+            className="flex-1 rounded border border-neutral-300 px-2 py-1 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+            placeholder="Notes"
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+          />
+          <button type="submit" className="rounded bg-blue-600 px-3 py-1 text-xs font-medium text-white hover:bg-blue-700">
+            Save
+          </button>
+        </form>
+      ) : (
+        session.notes && <p className="mt-1 text-neutral-500">{session.notes}</p>
+      )}
+    </Card>
+  );
 }
 
 export function SessionsPage() {
@@ -102,10 +146,7 @@ export function SessionsPage() {
       {!isLoading && !isError && sessions?.length === 0 && <p className="text-sm text-neutral-500">No sessions logged yet.</p>}
       <div className="space-y-2">
         {sessions?.map((s) => (
-          <Card key={s.id} className="flex items-center justify-between text-sm">
-            <span>{s.session_date} · {subjectName(s.subject_id)}</span>
-            <span className="text-neutral-500">{s.duration_minutes} min</span>
-          </Card>
+          <SessionRow key={s.id} session={s} subjectName={subjectName(s.subject_id)} />
         ))}
       </div>
     </div>

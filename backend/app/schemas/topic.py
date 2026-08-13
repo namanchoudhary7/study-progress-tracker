@@ -17,6 +17,11 @@ class TopicCreate(TopicBase):
     subject_id: int
 
 
+class TopicBulkCreate(BaseModel):
+    subject_id: int
+    text: str
+
+
 class TopicUpdate(BaseModel):
     name: str | None = None
     description: str | None = None

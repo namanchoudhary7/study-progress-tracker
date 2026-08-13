@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -11,7 +11,7 @@ from app.models.review import ReviewSchedule
 from app.models.subject import Subject
 from app.models.topic import Topic
 from app.models.user import User
-from app.schemas.topic import TopicCreate, TopicRead, TopicUpdate
+from app.schemas.topic import TopicBulkCreate, TopicCreate, TopicRead, TopicUpdate
 
 router = APIRouter(prefix="/topics", tags=["topics"])
 
@@ -49,6 +49,34 @@ def create_topic(
     db.commit()
     db.refresh(topic)
     return topic
+
+
+@router.post("/bulk", response_model=list[TopicRead], status_code=201)
+def bulk_create_topics(
+    payload: TopicBulkCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)
+) -> list[Topic]:
+    owns_subject = db.scalar(
+        select(Subject.id).where(Subject.id == payload.subject_id, Subject.user_id == current_user.id)
+    )
+    if owns_subject is None:
+        raise HTTPException(status_code=404, detail="Subject not found")
+
+    names = [line.strip() for line in payload.text.splitlines() if line.strip()]
+    if not names:
+        return []
+
+    next_order = db.scalar(
+        select(func.coalesce(func.max(Topic.order_index), -1) + 1).where(Topic.subject_id == payload.subject_id)
+    )
+    topics = [
+        Topic(subject_id=payload.subject_id, user_id=current_user.id, name=name, order_index=next_order + i)
+        for i, name in enumerate(names)
+    ]
+    db.add_all(topics)
+    db.commit()
+    for topic in topics:
+        db.refresh(topic)
+    return topics
 
 
 @router.get("/{topic_id}", response_model=TopicRead)

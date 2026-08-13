@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { Card } from "../../components/Card";
 import { TopicStatusBadge } from "../../components/StatusBadge";
 import { useSubjects } from "../../hooks/useSubjects";
-import { useCreateTopic, useDeleteTopic, useTopics, useUpdateTopic } from "../../hooks/useTopics";
+import { useBulkCreateTopics, useCreateTopic, useDeleteTopic, useTopics, useUpdateTopic } from "../../hooks/useTopics";
 import type { Topic, TopicStatus } from "../../api/types";
 
 const STATUS_OPTIONS: TopicStatus[] = ["todo", "in_progress", "done"];
@@ -89,12 +89,24 @@ export function SubjectDetailPage() {
   const subject = subjects?.find((s) => s.id === subjectId);
   const { data: topics, isLoading } = useTopics(subjectId);
   const createTopic = useCreateTopic();
+  const bulkCreateTopics = useBulkCreateTopics();
   const [name, setName] = useState("");
+  const [bulkOpen, setBulkOpen] = useState(false);
+  const [bulkText, setBulkText] = useState("");
 
   function handleCreate(e: React.FormEvent) {
     e.preventDefault();
     if (!name.trim()) return;
     createTopic.mutate({ subject_id: subjectId, name }, { onSuccess: () => setName("") });
+  }
+
+  function handleBulkCreate(e: React.FormEvent) {
+    e.preventDefault();
+    if (!bulkText.trim()) return;
+    bulkCreateTopics.mutate(
+      { subjectId, text: bulkText },
+      { onSuccess: () => { setBulkText(""); setBulkOpen(false); } }
+    );
   }
 
   return (
@@ -124,7 +136,47 @@ export function SubjectDetailPage() {
         >
           Add topic
         </button>
+        <button
+          type="button"
+          onClick={() => setBulkOpen((o) => !o)}
+          className="rounded border border-neutral-300 px-3 py-1.5 text-sm hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-800"
+        >
+          Bulk add
+        </button>
       </form>
+
+      {bulkOpen && (
+        <Card>
+          <form onSubmit={handleBulkCreate} className="space-y-2">
+            <label className="block text-sm text-neutral-500">
+              One topic per line — paste a syllabus or table of contents
+            </label>
+            <textarea
+              className="w-full rounded border border-neutral-300 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+              rows={6}
+              placeholder={"Introduction\nChapter 1: Basics\nChapter 2: Advanced Topics"}
+              value={bulkText}
+              onChange={(e) => setBulkText(e.target.value)}
+            />
+            <div className="flex gap-2">
+              <button
+                type="submit"
+                className="rounded bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
+                disabled={bulkCreateTopics.isPending}
+              >
+                Add topics
+              </button>
+              <button
+                type="button"
+                onClick={() => setBulkOpen(false)}
+                className="rounded border border-neutral-300 px-3 py-1.5 text-sm hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-800"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </Card>
+      )}
 
       {isLoading && <p className="text-sm text-neutral-500">Loading…</p>}
       {!isLoading && topics?.length === 0 && (

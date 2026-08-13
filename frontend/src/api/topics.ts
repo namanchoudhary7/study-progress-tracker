@@ -7,6 +7,8 @@ export const topicsApi = {
   get: (id: number) => api.get<Topic>(`/topics/${id}`),
   create: (data: Partial<Topic> & { subject_id: number; name: string }) =>
     api.post<Topic>("/topics", data),
+  bulkCreate: (subjectId: number, text: string) =>
+    api.post<Topic[]>("/topics/bulk", { subject_id: subjectId, text }),
   update: (id: number, data: Partial<Topic>) => api.patch<Topic>(`/topics/${id}`, data),
   remove: (id: number) => api.delete(`/topics/${id}`),
 };

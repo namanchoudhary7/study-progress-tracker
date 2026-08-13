@@ -24,7 +24,15 @@ A plain-language walkthrough of what this app does and how it's built. Written f
 
 **Why it's useful:** Completion status alone doesn't tell you where your time actually went. Logging sessions separately means you can later see "I spent 6 hours on Chemistry this week but only 20 minutes on Math" — the kind of insight that helps you rebalance effort.
 
-**How it works:** Each session is its own record, linked to a subject and (optionally) a specific topic, with a date and duration. Because dates are stored explicitly, you can also log sessions after the fact (e.g. backfilling yesterday's study time).
+**How it works:** Each session is its own record, linked to a subject and (optionally) a specific topic, with a date and duration. Because dates are stored explicitly, you can also log sessions after the fact (e.g. backfilling yesterday's study time). Any note you attach to a session is shown right in the session list, and can be edited later without re-logging the whole session.
+
+## Bulk Topic Import
+
+**What it does:** Instead of adding topics one at a time, you can paste a whole list — one topic per line, like a table of contents or a syllabus — and the app creates them all at once, in the order you pasted them.
+
+**Why it's useful:** Setting up a new subject with 20+ topics one-by-one is tedious. This turns "copy a syllabus, paste it in" into the whole setup step.
+
+**How it works:** The pasted text is split into lines on the server; blank lines are ignored, and each remaining line becomes its own topic, numbered to preserve the order you pasted them in.
 
 ## Goals & Deadlines
 

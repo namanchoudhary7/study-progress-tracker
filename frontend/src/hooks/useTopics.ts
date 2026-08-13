@@ -29,6 +29,14 @@ export function useUpdateTopic() {
   });
 }
 
+export function useBulkCreateTopics() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ subjectId, text }: { subjectId: number; text: string }) => topicsApi.bulkCreate(subjectId, text),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["topics"] }),
+  });
+}
+
 export function useDeleteTopic() {
   const qc = useQueryClient();
   return useMutation({

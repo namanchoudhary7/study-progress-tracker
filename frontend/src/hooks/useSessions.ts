@@ -20,6 +20,14 @@ export function useCreateSession() {
   });
 }
 
+export function useUpdateSession() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: number; data: Partial<StudySession> }) => sessionsApi.update(id, data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: sessionsKey }),
+  });
+}
+
 export function useDeleteSession() {
   const qc = useQueryClient();
   return useMutation({
