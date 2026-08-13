@@ -20,7 +20,7 @@ export function SignupPage() {
     setSubmitting(true);
     try {
       await signup(email, password);
-      navigate("/");
+      navigate("/dashboard");
     } catch {
       // error surfaced via signupError
     } finally {

@@ -1,6 +1,7 @@
 import { createBrowserRouter } from "react-router-dom";
 import { Layout } from "../components/Layout";
 import { ProtectedRoute } from "../components/ProtectedRoute";
+import { NotFoundPage } from "../components/NotFoundPage";
 import { DashboardPage } from "../features/dashboard/DashboardPage";
 import { SubjectsPage } from "../features/subjects/SubjectsPage";
 import { SubjectDetailPage } from "../features/subjects/SubjectDetailPage";
@@ -9,18 +10,19 @@ import { ReviewPage } from "../features/review/ReviewPage";
 import { GoalsPage } from "../features/goals/GoalsPage";
 import { LoginPage } from "../features/auth/LoginPage";
 import { SignupPage } from "../features/auth/SignupPage";
+import { LandingPage } from "../features/landing/LandingPage";
 
 export const router = createBrowserRouter([
+  { path: "/", element: <LandingPage /> },
   { path: "/login", element: <LoginPage /> },
   { path: "/signup", element: <SignupPage /> },
   {
-    path: "/",
     element: <ProtectedRoute />,
     children: [
       {
         element: <Layout />,
         children: [
-          { index: true, element: <DashboardPage /> },
+          { path: "dashboard", element: <DashboardPage /> },
           { path: "subjects", element: <SubjectsPage /> },
           { path: "subjects/:id", element: <SubjectDetailPage /> },
           { path: "sessions", element: <SessionsPage /> },
@@ -30,4 +32,5 @@ export const router = createBrowserRouter([
       },
     ],
   },
+  { path: "*", element: <NotFoundPage /> },
 ]);

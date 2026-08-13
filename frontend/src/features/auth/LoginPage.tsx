@@ -20,7 +20,7 @@ export function LoginPage() {
     setSubmitting(true);
     try {
       await login(email, password);
-      navigate("/");
+      navigate("/dashboard");
     } catch {
       // error surfaced via loginError
     } finally {

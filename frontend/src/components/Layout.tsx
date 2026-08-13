@@ -8,7 +8,7 @@ import { downloadExport } from "../api/export";
 import { IconButton } from "./ui/IconButton";
 
 const navItems = [
-  { to: "/", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/subjects", label: "Subjects", icon: BookOpen },
   { to: "/sessions", label: "Sessions", icon: Clock },
   { to: "/review", label: "Review", icon: RotateCcw },
@@ -53,7 +53,6 @@ export function Layout() {
           <NavLink
             key={item.to}
             to={item.to}
-            end={item.to === "/"}
             onClick={() => setMobileOpen(false)}
             className={({ isActive }) =>
               `flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
