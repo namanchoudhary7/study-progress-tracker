@@ -1,38 +1,41 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useSyncExternalStore } from "react";
 
 export type ThemePreference = "light" | "dark" | "system";
 
 const STORAGE_KEY = "theme-preference";
 
-function applyTheme(pref: ThemePreference) {
-  const isDark = pref === "dark" || (pref === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+let preference: ThemePreference = (localStorage.getItem(STORAGE_KEY) as ThemePreference | null) ?? "system";
+const listeners = new Set<() => void>();
+
+function applyTheme() {
+  const isDark = preference === "dark" || (preference === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
   document.documentElement.classList.toggle("dark", isDark);
 }
 
+applyTheme();
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
+  if (preference === "system") applyTheme();
+});
+
+function setPreference(next: ThemePreference) {
+  preference = next;
+  localStorage.setItem(STORAGE_KEY, next);
+  applyTheme();
+  listeners.forEach((l) => l());
+}
+
+function subscribe(listener: () => void): () => void {
+  listeners.add(listener);
+  return () => listeners.delete(listener);
+}
+
 export function useTheme() {
-  const [preference, setPreference] = useState<ThemePreference>(
-    () => (localStorage.getItem(STORAGE_KEY) as ThemePreference | null) ?? "system"
-  );
-
-  useEffect(() => {
-    applyTheme(preference);
-  }, [preference]);
-
-  useEffect(() => {
-    if (preference !== "system") return;
-    const media = window.matchMedia("(prefers-color-scheme: dark)");
-    const listener = () => applyTheme("system");
-    media.addEventListener("change", listener);
-    return () => media.removeEventListener("change", listener);
-  }, [preference]);
+  const current = useSyncExternalStore(subscribe, () => preference);
 
   const cyclePreference = useCallback(() => {
-    setPreference((prev) => {
-      const next: ThemePreference = prev === "light" ? "dark" : prev === "dark" ? "system" : "light";
-      localStorage.setItem(STORAGE_KEY, next);
-      return next;
-    });
+    const next: ThemePreference = preference === "light" ? "dark" : preference === "dark" ? "system" : "light";
+    setPreference(next);
   }, []);
 
-  return { preference, cyclePreference };
+  return { preference: current, cyclePreference };
 }
