@@ -2,8 +2,8 @@ import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxi
 import { useTimeSpentStats } from "../../hooks/useStats";
 import "./chart-theme.css";
 
-export function TimeSpentChart() {
-  const { data, isLoading } = useTimeSpentStats("day");
+export function TimeSpentChart({ groupBy }: { groupBy: "day" | "week" }) {
+  const { data, isLoading } = useTimeSpentStats(groupBy);
 
   if (isLoading) return <p className="text-sm text-neutral-500">Loading…</p>;
   if (!data || data.length === 0) return <p className="text-sm text-neutral-500">No study sessions logged yet.</p>;

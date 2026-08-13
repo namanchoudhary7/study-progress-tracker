@@ -20,3 +20,7 @@ export function useStreakStats() {
 export function useOverdueStats() {
   return useQuery({ queryKey: ["stats", "overdue"], queryFn: statsApi.overdue });
 }
+
+export function useHeatmapStats(days = 182) {
+  return useQuery({ queryKey: ["stats", "heatmap", days], queryFn: () => statsApi.heatmap(days) });
+}

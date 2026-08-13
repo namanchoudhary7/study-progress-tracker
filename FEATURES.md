@@ -48,7 +48,7 @@ A plain-language walkthrough of what this app does and how it's built. Written f
 
 **Why it's useful:** Raw data in a database isn't useful until it's summarized. This turns "a bunch of database rows" into an at-a-glance answer to "how am I doing?" — without having to open each subject individually.
 
-**How it works:** Nothing is pre-calculated or stored — every number on the dashboard is computed fresh from the underlying subjects/topics/sessions data each time the page loads, using aggregate database queries (sums, counts, groupings). "Current streak" counts backward from today through consecutive days that have at least one logged session.
+**How it works:** Nothing is pre-calculated or stored — every number on the dashboard is computed fresh from the underlying subjects/topics/sessions data each time the page loads, using aggregate database queries (sums, counts, groupings). "Current streak" counts backward from today through consecutive days that have at least one logged session. The "time spent" chart can be toggled between daily and weekly buckets, and a GitHub-style activity heatmap below it shows the last ~6 months at a glance, with darker squares meaning more time studied that day.
 
 ## Spaced Repetition Review
 

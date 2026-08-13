@@ -11,6 +11,7 @@ from app.models.subject import Subject
 from app.models.topic import Topic
 from app.schemas.stats import (
     CompletionItem,
+    HeatmapCell,
     OverdueGoal,
     OverdueSummary,
     OverviewStats,
@@ -159,3 +160,20 @@ def get_overdue(db: Session, user_id: int) -> OverdueSummary:
         overdue_goals=[OverdueGoal(id=g.id, title=g.title, target_date=g.target_date) for g in overdue_goals],
         due_reviews_count=due_reviews_count,
     )
+
+
+def get_heatmap(db: Session, user_id: int, days: int) -> list[HeatmapCell]:
+    today = date.today()
+    start = today - timedelta(days=days - 1)
+
+    rows = db.execute(
+        select(StudySession.session_date, func.sum(StudySession.duration_minutes))
+        .where(StudySession.user_id == user_id, StudySession.session_date >= start)
+        .group_by(StudySession.session_date)
+    ).all()
+    minutes_by_date = {d: m for d, m in rows}
+
+    return [
+        HeatmapCell(date=start + timedelta(days=i), minutes=minutes_by_date.get(start + timedelta(days=i), 0))
+        for i in range(days)
+    ]

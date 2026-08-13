@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.dependencies.auth import get_current_user
 from app.models.user import User
-from app.schemas.stats import CompletionItem, OverdueSummary, OverviewStats, StreakStats, TimeSpentPoint
+from app.schemas.stats import CompletionItem, HeatmapCell, OverdueSummary, OverviewStats, StreakStats, TimeSpentPoint
 from app.services import stats as stats_service
 
 router = APIRouter(prefix="/stats", tags=["stats"])
@@ -42,3 +42,11 @@ def streaks(db: Session = Depends(get_db), current_user: User = Depends(get_curr
 @router.get("/overdue", response_model=OverdueSummary)
 def overdue(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)) -> OverdueSummary:
     return stats_service.get_overdue(db, current_user.id)
+
+
+@router.get("/heatmap", response_model=list[HeatmapCell])
+def heatmap(
+    days: int = 182, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)
+) -> list[HeatmapCell]:
+    days = max(1, min(days, 366))
+    return stats_service.get_heatmap(db, current_user.id, days)

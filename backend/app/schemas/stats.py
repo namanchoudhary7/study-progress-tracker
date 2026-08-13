@@ -39,3 +39,8 @@ class OverdueGoal(BaseModel):
 class OverdueSummary(BaseModel):
     overdue_goals: list[OverdueGoal]
     due_reviews_count: int
+
+
+class HeatmapCell(BaseModel):
+    date: date
+    minutes: int

@@ -38,6 +38,11 @@ export interface OverdueSummary {
   due_reviews_count: number;
 }
 
+export interface HeatmapCell {
+  date: string;
+  minutes: number;
+}
+
 export const statsApi = {
   overview: () => api.get<OverviewStats>("/stats/overview"),
   completion: () => api.get<CompletionItem[]>("/stats/completion"),
@@ -45,4 +50,5 @@ export const statsApi = {
     api.get<TimeSpentPoint[]>(`/stats/time-spent?group_by=${groupBy}`),
   streaks: () => api.get<StreakStats>("/stats/streaks"),
   overdue: () => api.get<OverdueSummary>("/stats/overdue"),
+  heatmap: (days = 182) => api.get<HeatmapCell[]>(`/stats/heatmap?days=${days}`),
 };
