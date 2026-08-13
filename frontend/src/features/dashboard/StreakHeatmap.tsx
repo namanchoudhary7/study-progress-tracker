@@ -4,8 +4,9 @@ import "./chart-theme.css";
 const HEAT_LEVELS = ["var(--heat-0)", "var(--heat-1)", "var(--heat-2)", "var(--heat-3)", "var(--heat-4)"];
 const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const WEEKDAY_LABELS = ["", "Mon", "", "Wed", "", "Fri", ""];
-const CELL = 11;
-const GAP = 3;
+const CELL = 12;
+const GAP = 4;
+const DAYS = 365;
 
 function levelFor(minutes: number): number {
   if (minutes <= 0) return 0;
@@ -16,7 +17,7 @@ function levelFor(minutes: number): number {
 }
 
 export function StreakHeatmap() {
-  const { data, isLoading } = useHeatmapStats(182);
+  const { data, isLoading } = useHeatmapStats(DAYS);
 
   if (isLoading) return <p className="text-sm text-neutral-500">Loading…</p>;
   if (!data || data.length === 0) return <p className="text-sm text-neutral-500">No study sessions logged yet.</p>;
@@ -49,7 +50,7 @@ export function StreakHeatmap() {
       <p className="mb-3 text-sm text-neutral-600 dark:text-neutral-400">
         <span className="font-semibold text-neutral-900 dark:text-neutral-100">{totalMinutes} min</span> studied over{" "}
         <span className="font-semibold text-neutral-900 dark:text-neutral-100">{activeDays}</span> active day
-        {activeDays === 1 ? "" : "s"} in the last 6 months
+        {activeDays === 1 ? "" : "s"} in the last year
       </p>
       <div className="overflow-x-auto pb-1">
         <div className="flex">
@@ -96,7 +97,7 @@ export function StreakHeatmap() {
       <div className="mt-2 flex items-center justify-end gap-1 text-xs text-neutral-500">
         <span>Less</span>
         {HEAT_LEVELS.map((color, i) => (
-          <div key={i} className="h-[11px] w-[11px] rounded-sm" style={{ backgroundColor: color }} />
+          <div key={i} className="rounded-sm" style={{ width: CELL, height: CELL, backgroundColor: color }} />
         ))}
         <span>More</span>
       </div>

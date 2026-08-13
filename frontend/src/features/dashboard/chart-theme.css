@@ -4,36 +4,20 @@
   --axis: #c3c2b7;
   --ink-muted: #898781;
   --surface: #fcfcfb;
-  --heat-0: #f0efec;
+  --heat-0: #ebeef1;
   --heat-1: #cde2fb;
   --heat-2: #86b6ef;
   --heat-3: #3987e5;
   --heat-4: #184f95;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .viz-root {
-    --series-1: #3987e5;
-    --grid: #2c2c2a;
-    --axis: #383835;
-    --ink-muted: #898781;
-    --surface: #1a1a19;
-    --heat-0: #26261f;
-    --heat-1: #184f95;
-    --heat-2: #1c5cab;
-    --heat-3: #2a78d6;
-    --heat-4: #86b6ef;
-  }
-}
-
-:root[data-theme="dark"] .viz-root,
 :root.dark .viz-root {
   --series-1: #3987e5;
   --grid: #2c2c2a;
   --axis: #383835;
   --ink-muted: #898781;
   --surface: #1a1a19;
-  --heat-0: #26261f;
+  --heat-0: #262b31;
   --heat-1: #184f95;
   --heat-2: #1c5cab;
   --heat-3: #2a78d6;
