@@ -25,7 +25,10 @@ class LLMRouter:
 
     def __init__(self, providers: list[LLMProvider]) -> None:
         if not providers:
-            raise RuntimeError("No LLM providers configured — set ANTHROPIC_API_KEY and/or OPENAI_API_KEY")
+            raise RuntimeError(
+                "No LLM providers configured — set a key for at least one provider named in "
+                "LLM_PROVIDER_PRIORITY (e.g. GEMINI_API_KEY)"
+            )
         self._providers = providers
 
     async def stream_chat(

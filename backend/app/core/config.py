@@ -26,7 +26,7 @@ class Settings(BaseSettings):
     anthropic_api_key: str = ""
     openai_api_key: str = ""
     gemini_api_key: str = ""
-    llm_provider_priority: str = "anthropic,openai,gemini"
+    llm_provider_priority: str = "gemini"
 
     @property
     def llm_provider_priority_list(self) -> list[str]:
