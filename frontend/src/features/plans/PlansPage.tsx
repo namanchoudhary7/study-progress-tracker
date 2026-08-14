@@ -1,13 +1,15 @@
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { CalendarDays, Trash2 } from "lucide-react";
 import { Card } from "../../components/Card";
 import { ErrorBanner } from "../../components/ErrorBanner";
+import { useToast } from "../../components/Toast";
 import { Button } from "../../components/ui/Button";
 import { IconButton } from "../../components/ui/IconButton";
 import { Select } from "../../components/ui/Select";
 import { useSubjects } from "../../hooks/useSubjects";
 import { useTopics } from "../../hooks/useTopics";
-import { useCreatePlan, useDeletePlan, usePlans } from "../../hooks/usePlans";
+import { plansKey, useCreatePlan, useDeletePlan, usePlans } from "../../hooks/usePlans";
 import type { RecurringPlan } from "../../api/types";
 
 const DAYS = [
@@ -21,6 +23,8 @@ const DAYS = [
 ];
 
 export function PlansPage() {
+  const qc = useQueryClient();
+  const { showUndoToast } = useToast();
   const { data: plans, isLoading, isError, error, refetch } = usePlans();
   const { data: subjects } = useSubjects();
   const createPlan = useCreatePlan();
@@ -57,6 +61,15 @@ export function PlansPage() {
 
   function daysLabel(mask: number) {
     return DAYS.filter((d) => mask & d.bit).map((d) => d.label).join(", ");
+  }
+
+  function handleDelete(plan: RecurringPlan) {
+    qc.setQueryData<RecurringPlan[]>(plansKey, (old) => old?.filter((p) => p.id !== plan.id));
+    showUndoToast({
+      message: `Deleted "${subjectName(plan.subject_id)}${topicName(plan) ? ` · ${topicName(plan)}` : ""}" plan`,
+      onUndo: () => qc.invalidateQueries({ queryKey: plansKey }),
+      onExpire: () => deletePlan.mutate(plan.id),
+    });
   }
 
   return (
@@ -134,7 +147,7 @@ export function PlansPage() {
               icon={Trash2}
               label="Delete plan"
               variant="danger"
-              onClick={() => deletePlan.mutate(plan.id)}
+              onClick={() => handleDelete(plan)}
             />
           </Card>
         ))}
