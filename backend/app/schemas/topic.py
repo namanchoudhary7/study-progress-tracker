@@ -3,6 +3,7 @@ from datetime import date, datetime
 from pydantic import BaseModel, ConfigDict
 
 from app.models.enums import TopicStatus
+from app.schemas.tag import TagRead
 
 
 class TopicBase(BaseModel):
@@ -15,6 +16,7 @@ class TopicBase(BaseModel):
 
 class TopicCreate(TopicBase):
     subject_id: int
+    tag_ids: list[int] | None = None
 
 
 class TopicBulkCreate(BaseModel):
@@ -29,6 +31,7 @@ class TopicUpdate(BaseModel):
     order_index: int | None = None
     notes: str | None = None
     target_date: date | None = None
+    tag_ids: list[int] | None = None
 
 
 class TopicRead(TopicBase):
@@ -40,3 +43,4 @@ class TopicRead(TopicBase):
     completed_at: datetime | None
     created_at: datetime
     updated_at: datetime
+    tags: list[TagRead]

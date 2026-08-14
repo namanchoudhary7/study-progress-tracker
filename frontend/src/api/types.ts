@@ -11,6 +11,13 @@ export interface Subject {
   updated_at: string;
 }
 
+export interface Tag {
+  id: number;
+  name: string;
+  color: string | null;
+  created_at: string;
+}
+
 export interface Topic {
   id: number;
   subject_id: number;
@@ -23,6 +30,7 @@ export interface Topic {
   completed_at: string | null;
   created_at: string;
   updated_at: string;
+  tags: Tag[];
 }
 
 export interface StudySession {

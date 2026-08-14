@@ -1,13 +1,49 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Trash2, X } from "lucide-react";
+import { CheckCircle2, Trash2, X } from "lucide-react";
 import { Card } from "../../components/Card";
 import { ErrorBanner } from "../../components/ErrorBanner";
+import { Badge } from "../../components/ui/Badge";
 import { Button } from "../../components/ui/Button";
 import { IconButton } from "../../components/ui/IconButton";
 import { Input } from "../../components/ui/Input";
 import { useAuth } from "../../context/AuthContext";
 import { useChangePassword, useDeleteAccount, useUpdateProfile } from "../../hooks/useAccount";
+
+function EmailVerificationStatus() {
+  const { user, resendVerification } = useAuth();
+  const [state, setState] = useState<"idle" | "sending" | "sent">("idle");
+
+  if (!user) return null;
+
+  if (user.email_verified) {
+    return (
+      <Badge className="flex items-center gap-1 bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-400">
+        <CheckCircle2 className="h-3 w-3" /> Verified
+      </Badge>
+    );
+  }
+
+  if (state === "sent") {
+    return <span className="text-xs text-neutral-500">Verification email sent</span>;
+  }
+
+  async function handleClick() {
+    setState("sending");
+    try {
+      await resendVerification();
+      setState("sent");
+    } catch {
+      setState("idle");
+    }
+  }
+
+  return (
+    <Button size="sm" variant="secondary" onClick={handleClick} disabled={state === "sending"}>
+      {state === "sending" ? "Sending…" : "Verify email"}
+    </Button>
+  );
+}
 
 function ProfileSection() {
   const { user } = useAuth();
@@ -47,7 +83,10 @@ function ProfileSection() {
           />
         </div>
         <div>
-          <label className="mb-1 block text-xs text-neutral-500">Email</label>
+          <div className="mb-1 flex items-center justify-between">
+            <label className="text-xs text-neutral-500">Email</label>
+            <EmailVerificationStatus />
+          </div>
           <Input
             type="email"
             className="w-full"

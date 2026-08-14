@@ -1,16 +1,19 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
-import { ListChecks, Pencil, Trash2 } from "lucide-react";
+import { ListChecks, Pencil, Tag as TagIcon, Trash2 } from "lucide-react";
 import { Card } from "../../components/Card";
 import { TopicStatusBadge } from "../../components/StatusBadge";
+import { TagPickerModal } from "../../components/TagPickerModal";
 import { useToast } from "../../components/Toast";
+import { Badge } from "../../components/ui/Badge";
 import { Button } from "../../components/ui/Button";
 import { IconButton } from "../../components/ui/IconButton";
 import { Input } from "../../components/ui/Input";
 import { Select } from "../../components/ui/Select";
 import { Textarea } from "../../components/ui/Textarea";
 import { useSubjects } from "../../hooks/useSubjects";
+import { useTags } from "../../hooks/useTags";
 import {
   topicsKey,
   useBulkCreateTopics,
@@ -22,6 +25,7 @@ import {
 import type { Topic, TopicStatus } from "../../api/types";
 
 const STATUS_OPTIONS: TopicStatus[] = ["todo", "in_progress", "done"];
+const DEFAULT_TAG_COLOR = "#2a78d6";
 
 function TopicRow({ topic }: { topic: Topic }) {
   const qc = useQueryClient();
@@ -29,6 +33,7 @@ function TopicRow({ topic }: { topic: Topic }) {
   const updateTopic = useUpdateTopic();
   const deleteTopic = useDeleteTopic();
   const [editing, setEditing] = useState(false);
+  const [tagPickerOpen, setTagPickerOpen] = useState(false);
   const [name, setName] = useState(topic.name);
   const [notes, setNotes] = useState(topic.notes ?? "");
 
@@ -69,6 +74,15 @@ function TopicRow({ topic }: { topic: Topic }) {
       <div>
         <p className="font-medium">{topic.name}</p>
         {topic.notes && <p className="text-sm text-neutral-500">{topic.notes}</p>}
+        {topic.tags.length > 0 && (
+          <div className="mt-1 flex flex-wrap gap-1">
+            {topic.tags.map((tag) => (
+              <Badge key={tag.id} style={{ backgroundColor: tag.color ?? DEFAULT_TAG_COLOR, color: "#fff" }}>
+                {tag.name}
+              </Badge>
+            ))}
+          </div>
+        )}
       </div>
       <div className="flex items-center gap-2">
         <TopicStatusBadge status={topic.status} />
@@ -83,9 +97,11 @@ function TopicRow({ topic }: { topic: Topic }) {
             </option>
           ))}
         </Select>
+        <IconButton icon={TagIcon} label="Manage tags" onClick={() => setTagPickerOpen(true)} />
         <IconButton icon={Pencil} label="Edit topic" onClick={() => setEditing(true)} />
         <IconButton icon={Trash2} label="Delete topic" variant="danger" onClick={handleDelete} />
       </div>
+      {tagPickerOpen && <TagPickerModal topic={topic} onClose={() => setTagPickerOpen(false)} />}
     </Card>
   );
 }
@@ -96,11 +112,20 @@ export function SubjectDetailPage() {
   const { data: subjects } = useSubjects();
   const subject = subjects?.find((s) => s.id === subjectId);
   const { data: topics, isLoading } = useTopics(subjectId);
+  const { data: tags } = useTags();
   const createTopic = useCreateTopic();
   const bulkCreateTopics = useBulkCreateTopics();
   const [name, setName] = useState("");
   const [bulkOpen, setBulkOpen] = useState(false);
   const [bulkText, setBulkText] = useState("");
+  const [filterTagIds, setFilterTagIds] = useState<number[]>([]);
+
+  function toggleFilterTag(tagId: number) {
+    setFilterTagIds((ids) => (ids.includes(tagId) ? ids.filter((id) => id !== tagId) : [...ids, tagId]));
+  }
+
+  const visibleTopics =
+    filterTagIds.length === 0 ? topics : topics?.filter((t) => t.tags.some((tag) => filterTagIds.includes(tag.id)));
 
   function handleCreate(e: React.FormEvent) {
     e.preventDefault();
@@ -165,6 +190,34 @@ export function SubjectDetailPage() {
         )}
       </Card>
 
+      {tags && tags.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-xs text-neutral-500">Filter by tag:</span>
+          {tags.map((tag) => {
+            const active = filterTagIds.includes(tag.id);
+            const color = tag.color ?? "#2a78d6";
+            return (
+              <button
+                key={tag.id}
+                onClick={() => toggleFilterTag(tag.id)}
+                className="rounded-full px-2.5 py-1 text-xs font-medium transition-colors"
+                style={active ? { backgroundColor: color, color: "#fff" } : { boxShadow: `inset 0 0 0 1px ${color}`, color }}
+              >
+                {tag.name}
+              </button>
+            );
+          })}
+          {filterTagIds.length > 0 && (
+            <button
+              onClick={() => setFilterTagIds([])}
+              className="text-xs text-neutral-500 hover:underline"
+            >
+              Clear
+            </button>
+          )}
+        </div>
+      )}
+
       {isLoading && <p className="text-sm text-neutral-500">Loading…</p>}
       {!isLoading && topics?.length === 0 && (
         <div className="flex flex-col items-center gap-2 py-10 text-center text-sm text-neutral-500">
@@ -172,8 +225,11 @@ export function SubjectDetailPage() {
           No topics yet — add one above.
         </div>
       )}
+      {!isLoading && topics && topics.length > 0 && visibleTopics?.length === 0 && (
+        <p className="text-sm text-neutral-500">No topics match the selected tags.</p>
+      )}
       <div className="space-y-2">
-        {topics?.map((topic) => <TopicRow key={topic.id} topic={topic} />)}
+        {visibleTopics?.map((topic) => <TopicRow key={topic.id} topic={topic} />)}
       </div>
     </div>
   );

@@ -6,6 +6,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.core.database import Base
 from app.models.enums import TopicStatus
 from app.models.mixins import TimestampMixin
+from app.models.tag import topic_tags
 
 
 class Topic(Base, TimestampMixin):
@@ -32,3 +33,4 @@ class Topic(Base, TimestampMixin):
         back_populates="topic", uselist=False, cascade="all, delete-orphan"
     )
     review_logs: Mapped[list["ReviewLog"]] = relationship(back_populates="topic", cascade="all, delete-orphan")
+    tags: Mapped[list["Tag"]] = relationship(secondary=topic_tags, back_populates="topics")

@@ -10,10 +10,12 @@ export function useTopics(subjectId?: number) {
   return useQuery({ queryKey: topicsKey(subjectId), queryFn: () => topicsApi.list(subjectId) });
 }
 
+type TopicWrite = Partial<Omit<Topic, "tags">> & { tag_ids?: number[] };
+
 export function useCreateTopic() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: Partial<Topic> & { subject_id: number; name: string }) => topicsApi.create(data),
+    mutationFn: (data: TopicWrite & { subject_id: number; name: string }) => topicsApi.create(data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["topics"] }),
   });
 }
@@ -21,7 +23,7 @@ export function useCreateTopic() {
 export function useUpdateTopic() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: number; data: Partial<Topic> }) => topicsApi.update(id, data),
+    mutationFn: ({ id, data }: { id: number; data: TopicWrite }) => topicsApi.update(id, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["topics"] });
       qc.invalidateQueries({ queryKey: ["reviews"] });

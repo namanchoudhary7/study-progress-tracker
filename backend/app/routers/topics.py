@@ -9,6 +9,7 @@ from app.dependencies.auth import get_current_user
 from app.models.enums import TopicStatus
 from app.models.review import ReviewSchedule
 from app.models.subject import Subject
+from app.models.tag import Tag
 from app.models.topic import Topic
 from app.models.user import User
 from app.schemas.topic import TopicBulkCreate, TopicCreate, TopicRead, TopicUpdate
@@ -21,6 +22,15 @@ def _get_topic_or_404(db: Session, topic_id: int, current_user: User) -> Topic:
     if topic is None:
         raise HTTPException(status_code=404, detail="Topic not found")
     return topic
+
+
+def _get_owned_tags(db: Session, tag_ids: list[int], current_user: User) -> list[Tag]:
+    if not tag_ids:
+        return []
+    tags = list(db.scalars(select(Tag).where(Tag.id.in_(tag_ids), Tag.user_id == current_user.id)))
+    if len(tags) != len(set(tag_ids)):
+        raise HTTPException(status_code=404, detail="One or more tags not found")
+    return tags
 
 
 @router.get("", response_model=list[TopicRead])
@@ -44,7 +54,9 @@ def create_topic(
     )
     if owns_subject is None:
         raise HTTPException(status_code=404, detail="Subject not found")
-    topic = Topic(**payload.model_dump(), user_id=current_user.id)
+    topic = Topic(**payload.model_dump(exclude={"tag_ids"}), user_id=current_user.id)
+    if payload.tag_ids is not None:
+        topic.tags = _get_owned_tags(db, payload.tag_ids, current_user)
     db.add(topic)
     db.commit()
     db.refresh(topic)
@@ -92,11 +104,14 @@ def update_topic(
     current_user: User = Depends(get_current_user),
 ) -> Topic:
     topic = _get_topic_or_404(db, topic_id, current_user)
-    updates = payload.model_dump(exclude_unset=True)
+    updates = payload.model_dump(exclude_unset=True, exclude={"tag_ids"})
 
     was_done = topic.status == TopicStatus.done
     for field, value in updates.items():
         setattr(topic, field, value)
+
+    if payload.tag_ids is not None:
+        topic.tags = _get_owned_tags(db, payload.tag_ids, current_user)
 
     if "status" in updates:
         if topic.status == TopicStatus.done and not was_done:
