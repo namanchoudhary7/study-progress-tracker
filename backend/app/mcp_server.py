@@ -45,9 +45,13 @@ async def _call_tool(name: str, arguments: dict):
         except KeyError as exc:
             return {"error": str(exc)}
         try:
-            return tool.call(db, user, arguments)
+            result = tool.call(db, user, arguments)
         except Exception as exc:  # noqa: BLE001 — surfaced to the MCP client as a tool error, not a crash
             logger.warning("MCP tool %s failed for user %s: %s", name, user_id, exc)
             return {"error": str(exc)}
+        # The MCP SDK's call_tool handler only special-cases dict results as structured content;
+        # anything else (e.g. the lists most list_* tools return) gets misread as an iterable of
+        # ContentBlock objects instead of plain JSON data. Always hand it a dict.
+        return result if isinstance(result, dict) else {"result": result}
     finally:
         db.close()
