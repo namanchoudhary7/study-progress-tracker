@@ -3,7 +3,7 @@ from typing import Any, AsyncIterator
 
 from app.core.config import settings
 from app.services.llm.anthropic_provider import AnthropicProvider
-from app.services.llm.base import LLMEvent, LLMProvider, ProviderUnavailable
+from app.services.llm.base import LLMEvent, LLMProvider, ProviderUnavailable, TurnComplete
 from app.services.llm.gemini_provider import GeminiProvider
 from app.services.llm.openai_provider import OpenAIProvider
 
@@ -50,6 +50,8 @@ class LLMRouter:
             try:
                 async for event in provider.stream_chat(messages, tools, system):
                     emitted_any = True
+                    if isinstance(event, TurnComplete):
+                        event.provider_name = provider.name
                     yield event
                 return
             except ProviderUnavailable as exc:

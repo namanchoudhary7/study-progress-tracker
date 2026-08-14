@@ -22,6 +22,8 @@ class TurnComplete:
     text: str
     tool_calls: list[ToolCall] = field(default_factory=list)
     stop_reason: str = "end_turn"
+    # Set by LLMRouter to the provider/model that produced this turn (e.g. "gemini:gemini-3.7-flash").
+    provider_name: str = ""
 
 
 LLMEvent = TextDelta | TurnComplete

@@ -70,7 +70,7 @@ async def _run_agent(db: Session, user: User, messages: list[dict[str, Any]]) ->
                 return
 
             if not final.tool_calls:
-                yield _sse("done", {"text": final.text})
+                yield _sse("done", {"text": final.text, "model": final.provider_name})
                 return
 
             working_messages.append(

@@ -11,7 +11,7 @@ export type AgentStreamEvent =
   | { type: "delta"; text: string }
   | { type: "tool_call"; name: string; arguments: Record<string, unknown> }
   | { type: "tool_result"; name: string; result: unknown }
-  | { type: "done"; text: string }
+  | { type: "done"; text: string; model?: string }
   | { type: "error"; message: string };
 
 /** Parses one `event: ...\ndata: ...\n\n` SSE frame into an AgentStreamEvent. */

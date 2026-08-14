@@ -8,6 +8,7 @@ import { streamChat, type ChatMessage } from "../../api/agent";
 
 interface DisplayMessage extends ChatMessage {
   toolCalls?: string[];
+  model?: string;
 }
 
 const SUGGESTIONS = [
@@ -50,6 +51,7 @@ export function AgentPage() {
             last.toolCalls = [...(last.toolCalls ?? []), event.name];
           } else if (event.type === "done") {
             last.content = event.text || last.content;
+            last.model = event.model?.replace(/^gemini:/, "");
           } else if (event.type === "error") {
             setError(event.message);
           }
@@ -109,6 +111,9 @@ export function AgentPage() {
                 </div>
               )}
               {m.content || (streaming && i === messages.length - 1 ? "…" : "")}
+              {m.role === "assistant" && m.model && (
+                <div className="mt-1 text-[10px] text-neutral-400 dark:text-neutral-600">{m.model}</div>
+              )}
             </div>
           </div>
         ))}
