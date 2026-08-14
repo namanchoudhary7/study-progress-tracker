@@ -15,11 +15,10 @@ class GeminiProvider:
     """Fallback provider. Non-streaming under the hood (simpler/safer tool-call handling);
     emits its full answer as a single TextDelta before the final TurnComplete."""
 
-    name = "gemini"
-
     def __init__(self, api_key: str, model: str = DEFAULT_MODEL) -> None:
         self._client = genai.Client(api_key=api_key)
         self._model = model
+        self.name = f"gemini:{model}"
 
     async def stream_chat(
         self, messages: list[dict[str, Any]], tools: list[dict[str, Any]], system: str

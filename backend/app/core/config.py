@@ -27,10 +27,18 @@ class Settings(BaseSettings):
     openai_api_key: str = ""
     gemini_api_key: str = ""
     llm_provider_priority: str = "gemini"
+    gemini_model_priority: str = (
+        "gemini-3.7-flash,gemini-3.6-flash,gemini-3.5-flash,gemini-2.5-flash,"
+        "gemini-3.5-flash-lite,gemini-2.5-flash-lite"
+    )
 
     @property
     def llm_provider_priority_list(self) -> list[str]:
         return [p.strip() for p in self.llm_provider_priority.split(",") if p.strip()]
+
+    @property
+    def gemini_model_priority_list(self) -> list[str]:
+        return [m.strip() for m in self.gemini_model_priority.split(",") if m.strip()]
 
     @property
     def cors_origins_list(self) -> list[str]:

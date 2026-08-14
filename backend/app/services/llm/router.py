@@ -9,11 +9,21 @@ from app.services.llm.openai_provider import OpenAIProvider
 
 logger = logging.getLogger(__name__)
 
-_PROVIDER_FACTORIES = {
+_SINGLE_PROVIDER_FACTORIES = {
     "anthropic": lambda: AnthropicProvider(api_key=settings.anthropic_api_key) if settings.anthropic_api_key else None,
     "openai": lambda: OpenAIProvider(api_key=settings.openai_api_key) if settings.openai_api_key else None,
-    "gemini": lambda: GeminiProvider(api_key=settings.gemini_api_key) if settings.gemini_api_key else None,
 }
+
+
+def _build_gemini_providers() -> list[LLMProvider]:
+    """One GeminiProvider per model in GEMINI_MODEL_PRIORITY, tried in order.
+
+    Reuses the same failover-on-ProviderUnavailable logic as cross-provider routing,
+    so a model that's overloaded, rate-limited, or retired falls through to the next.
+    """
+    if not settings.gemini_api_key:
+        return []
+    return [GeminiProvider(api_key=settings.gemini_api_key, model=model) for model in settings.gemini_model_priority_list]
 
 
 class LLMRouter:
@@ -54,7 +64,10 @@ class LLMRouter:
 def build_default_router() -> LLMRouter:
     providers: list[LLMProvider] = []
     for name in settings.llm_provider_priority_list:
-        factory = _PROVIDER_FACTORIES.get(name)
+        if name == "gemini":
+            providers.extend(_build_gemini_providers())
+            continue
+        factory = _SINGLE_PROVIDER_FACTORIES.get(name)
         if factory is None:
             logger.warning("Unknown LLM provider in LLM_PROVIDER_PRIORITY: %s", name)
             continue
