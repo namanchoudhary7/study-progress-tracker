@@ -17,6 +17,7 @@ class TopicBase(BaseModel):
 class TopicCreate(TopicBase):
     subject_id: int
     tag_ids: list[int] | None = None
+    parent_topic_id: int | None = None
 
 
 class TopicBulkCreate(BaseModel):
@@ -32,6 +33,7 @@ class TopicUpdate(BaseModel):
     notes: str | None = None
     target_date: date | None = None
     tag_ids: list[int] | None = None
+    parent_topic_id: int | None = None
 
 
 class TopicRead(TopicBase):
@@ -44,3 +46,4 @@ class TopicRead(TopicBase):
     created_at: datetime
     updated_at: datetime
     tags: list[TagRead]
+    parent_topic_id: int | None

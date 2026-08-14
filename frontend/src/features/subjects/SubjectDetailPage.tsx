@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
-import { BookOpen, ListChecks, Pencil, Tag as TagIcon, Trash2 } from "lucide-react";
+import { BookOpen, ListChecks, Pencil, Plus, Tag as TagIcon, Trash2 } from "lucide-react";
 import { Card } from "../../components/Card";
 import { ResourceModal } from "../../components/ResourceModal";
 import { TopicStatusBadge } from "../../components/StatusBadge";
@@ -28,14 +28,17 @@ import type { Topic, TopicStatus } from "../../api/types";
 const STATUS_OPTIONS: TopicStatus[] = ["todo", "in_progress", "done"];
 const DEFAULT_TAG_COLOR = "#2a78d6";
 
-function TopicRow({ topic }: { topic: Topic }) {
+function TopicRow({ topic, depth = 0 }: { topic: Topic; depth?: number }) {
   const qc = useQueryClient();
   const { showUndoToast } = useToast();
   const updateTopic = useUpdateTopic();
   const deleteTopic = useDeleteTopic();
+  const createTopic = useCreateTopic();
   const [editing, setEditing] = useState(false);
   const [tagPickerOpen, setTagPickerOpen] = useState(false);
   const [resourcesOpen, setResourcesOpen] = useState(false);
+  const [addingChild, setAddingChild] = useState(false);
+  const [childName, setChildName] = useState("");
   const [name, setName] = useState(topic.name);
   const [notes, setNotes] = useState(topic.notes ?? "");
 
@@ -54,9 +57,20 @@ function TopicRow({ topic }: { topic: Topic }) {
     });
   }
 
+  function handleAddChild(e: React.FormEvent) {
+    e.preventDefault();
+    if (!childName.trim()) return;
+    createTopic.mutate(
+      { subject_id: topic.subject_id, name: childName, parent_topic_id: topic.id },
+      { onSuccess: () => { setChildName(""); setAddingChild(false); } }
+    );
+  }
+
+  const indentStyle = depth > 0 ? { marginLeft: `${depth * 1.5}rem` } : undefined;
+
   if (editing) {
     return (
-      <Card>
+      <Card style={indentStyle}>
         <form onSubmit={handleSave} className="flex flex-wrap items-center gap-2">
           <Input value={name} onChange={(e) => setName(e.target.value)} />
           <Input className="flex-1" placeholder="Notes" value={notes} onChange={(e) => setNotes(e.target.value)} />
@@ -72,7 +86,7 @@ function TopicRow({ topic }: { topic: Topic }) {
   }
 
   return (
-    <Card className="flex items-center justify-between">
+    <Card className="flex items-center justify-between" style={indentStyle}>
       <div>
         <p className="font-medium">{topic.name}</p>
         {topic.notes && <p className="text-sm text-neutral-500">{topic.notes}</p>}
@@ -84,6 +98,22 @@ function TopicRow({ topic }: { topic: Topic }) {
               </Badge>
             ))}
           </div>
+        )}
+        {addingChild && (
+          <form onSubmit={handleAddChild} className="mt-2 flex items-center gap-2">
+            <Input
+              autoFocus
+              placeholder="Sub-topic name"
+              value={childName}
+              onChange={(e) => setChildName(e.target.value)}
+            />
+            <Button type="submit" size="sm" variant="primary" disabled={createTopic.isPending}>
+              Add
+            </Button>
+            <Button type="button" size="sm" variant="secondary" onClick={() => setAddingChild(false)}>
+              Cancel
+            </Button>
+          </form>
         )}
       </div>
       <div className="flex items-center gap-2">
@@ -99,6 +129,7 @@ function TopicRow({ topic }: { topic: Topic }) {
             </option>
           ))}
         </Select>
+        <IconButton icon={Plus} label="Add sub-topic" onClick={() => setAddingChild(true)} />
         <IconButton icon={TagIcon} label="Manage tags" onClick={() => setTagPickerOpen(true)} />
         <IconButton icon={BookOpen} label="Manage resources" onClick={() => setResourcesOpen(true)} />
         <IconButton icon={Pencil} label="Edit topic" onClick={() => setEditing(true)} />
@@ -107,6 +138,21 @@ function TopicRow({ topic }: { topic: Topic }) {
       {tagPickerOpen && <TagPickerModal topic={topic} onClose={() => setTagPickerOpen(false)} />}
       {resourcesOpen && <ResourceModal topic={topic} onClose={() => setResourcesOpen(false)} />}
     </Card>
+  );
+}
+
+function TopicTree({ topics, parentId, depth }: { topics: Topic[]; parentId: number | null; depth: number }) {
+  const children = topics.filter((t) => t.parent_topic_id === parentId);
+  if (children.length === 0) return null;
+  return (
+    <>
+      {children.map((topic) => (
+        <div key={topic.id} className="space-y-2">
+          <TopicRow topic={topic} depth={depth} />
+          <TopicTree topics={topics} parentId={topic.id} depth={depth + 1} />
+        </div>
+      ))}
+    </>
   );
 }
 
@@ -233,7 +279,9 @@ export function SubjectDetailPage() {
         <p className="text-sm text-neutral-500">No topics match the selected tags.</p>
       )}
       <div className="space-y-2">
-        {visibleTopics?.map((topic) => <TopicRow key={topic.id} topic={topic} />)}
+        {filterTagIds.length === 0
+          ? visibleTopics && <TopicTree topics={visibleTopics} parentId={null} depth={0} />
+          : visibleTopics?.map((topic) => <TopicRow key={topic.id} topic={topic} />)}
       </div>
     </div>
   );

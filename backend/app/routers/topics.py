@@ -33,6 +33,22 @@ def _get_owned_tags(db: Session, tag_ids: list[int], current_user: User) -> list
     return tags
 
 
+def _validate_parent(
+    db: Session, parent_topic_id: int, subject_id: int, current_user: User, exclude_topic_id: int | None = None
+) -> None:
+    parent = db.scalar(select(Topic).where(Topic.id == parent_topic_id, Topic.user_id == current_user.id))
+    if parent is None:
+        raise HTTPException(status_code=404, detail="Parent topic not found")
+    if parent.subject_id != subject_id:
+        raise HTTPException(status_code=400, detail="Parent topic must belong to the same subject")
+    if exclude_topic_id is not None:
+        cursor = parent
+        while cursor is not None:
+            if cursor.id == exclude_topic_id:
+                raise HTTPException(status_code=400, detail="A topic cannot be nested under itself or its own descendant")
+            cursor = cursor.parent
+
+
 @router.get("", response_model=list[TopicRead])
 def list_topics(
     subject_id: int | None = None,
@@ -54,6 +70,8 @@ def create_topic(
     )
     if owns_subject is None:
         raise HTTPException(status_code=404, detail="Subject not found")
+    if payload.parent_topic_id is not None:
+        _validate_parent(db, payload.parent_topic_id, payload.subject_id, current_user)
     topic = Topic(**payload.model_dump(exclude={"tag_ids"}), user_id=current_user.id)
     if payload.tag_ids is not None:
         topic.tags = _get_owned_tags(db, payload.tag_ids, current_user)
@@ -105,6 +123,9 @@ def update_topic(
 ) -> Topic:
     topic = _get_topic_or_404(db, topic_id, current_user)
     updates = payload.model_dump(exclude_unset=True, exclude={"tag_ids"})
+
+    if "parent_topic_id" in updates and updates["parent_topic_id"] is not None:
+        _validate_parent(db, updates["parent_topic_id"], topic.subject_id, current_user, exclude_topic_id=topic.id)
 
     was_done = topic.status == TopicStatus.done
     for field, value in updates.items():

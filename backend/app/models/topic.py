@@ -24,9 +24,14 @@ class Topic(Base, TimestampMixin):
     notes: Mapped[str | None] = mapped_column(Text)
     target_date: Mapped[date | None] = mapped_column(Date)
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    parent_topic_id: Mapped[int | None] = mapped_column(
+        ForeignKey("topics.id", ondelete="CASCADE"), index=True
+    )
 
     user: Mapped["User"] = relationship(back_populates="topics")
     subject: Mapped["Subject"] = relationship(back_populates="topics")
+    parent: Mapped["Topic | None"] = relationship(back_populates="children", remote_side="Topic.id")
+    children: Mapped[list["Topic"]] = relationship(back_populates="parent", cascade="all, delete-orphan")
     study_sessions: Mapped[list["StudySession"]] = relationship(back_populates="topic")
     goals: Mapped[list["Goal"]] = relationship(back_populates="topic")
     review_schedule: Mapped["ReviewSchedule | None"] = relationship(
