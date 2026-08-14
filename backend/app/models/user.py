@@ -28,6 +28,7 @@ class User(Base, TimestampMixin):
     topics: Mapped[list["Topic"]] = relationship(back_populates="user", cascade="all, delete-orphan")
     study_sessions: Mapped[list["StudySession"]] = relationship(back_populates="user", cascade="all, delete-orphan")
     goals: Mapped[list["Goal"]] = relationship(back_populates="user", cascade="all, delete-orphan")
+    recurring_plans: Mapped[list["RecurringPlan"]] = relationship(back_populates="user", cascade="all, delete-orphan")
 
     @property
     def has_password(self) -> bool:

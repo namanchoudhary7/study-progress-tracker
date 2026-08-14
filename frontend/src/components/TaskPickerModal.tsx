@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { CircleDot, ListTodo, X } from "lucide-react";
+import { CalendarDays, CircleDot, ListTodo, X } from "lucide-react";
 import { useSubjects } from "../hooks/useSubjects";
 import { useTopics } from "../hooks/useTopics";
+import { useTodayPlans } from "../hooks/usePlans";
 import { useTimer } from "../context/TimerContext";
 import { IconButton } from "./ui/IconButton";
 import { Input } from "./ui/Input";
@@ -9,6 +10,7 @@ import { Input } from "./ui/Input";
 export function TaskPickerModal({ onClose }: { onClose: () => void }) {
   const { data: subjects } = useSubjects();
   const { data: topics, isLoading } = useTopics();
+  const { data: todayPlans } = useTodayPlans();
   const { start } = useTimer();
   const [pomodoroOn, setPomodoroOn] = useState(false);
   const [workMinutes, setWorkMinutes] = useState("25");
@@ -16,14 +18,12 @@ export function TaskPickerModal({ onClose }: { onClose: () => void }) {
 
   const pending = (topics ?? []).filter((t) => t.status === "todo" || t.status === "in_progress");
   const subjectName = (id: number) => subjects?.find((s) => s.id === id)?.name ?? "—";
+  const pomodoroConfig = pomodoroOn
+    ? { workMinutes: Number(workMinutes) || 25, breakMinutes: Number(breakMinutes) || 5 }
+    : undefined;
 
-  function handlePick(topicId: number, topicName: string, subjectId: number) {
-    start(
-      { subjectId, subjectName: subjectName(subjectId), topicId, topicName },
-      pomodoroOn
-        ? { workMinutes: Number(workMinutes) || 25, breakMinutes: Number(breakMinutes) || 5 }
-        : undefined
-    );
+  function handlePick(topicId: number | null, topicName: string | null, subjectId: number) {
+    start({ subjectId, subjectName: subjectName(subjectId), topicId, topicName }, pomodoroConfig);
     onClose();
   }
 
@@ -69,6 +69,27 @@ export function TaskPickerModal({ onClose }: { onClose: () => void }) {
             </div>
           )}
         </div>
+
+        {todayPlans && todayPlans.length > 0 && (
+          <div className="mb-3 space-y-1 border-b border-neutral-200 pb-3 dark:border-neutral-800">
+            <p className="flex items-center gap-1 text-xs font-medium text-neutral-500">
+              <CalendarDays className="h-3.5 w-3.5" /> Today's plan
+            </p>
+            {todayPlans.map((plan) => (
+              <button
+                key={plan.id}
+                onClick={() => handlePick(plan.topic_id, plan.topic_name, plan.subject_id)}
+                className="flex w-full items-center gap-2 rounded-lg bg-blue-50 px-3 py-2 text-left text-sm hover:bg-blue-100 dark:bg-blue-950/30 dark:hover:bg-blue-950/50"
+              >
+                <CalendarDays className="h-3.5 w-3.5 shrink-0 text-blue-600 dark:text-blue-400" />
+                <span className="flex-1">
+                  <span className="font-medium">{plan.topic_name ?? plan.subject_name}</span>
+                  {plan.topic_name && <span className="text-neutral-500"> · {plan.subject_name}</span>}
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
 
         {isLoading && <p className="text-sm text-neutral-500">Loading…</p>}
 

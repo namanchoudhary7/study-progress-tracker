@@ -2,6 +2,7 @@ import { useState } from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
   BookOpen,
+  CalendarDays,
   Clock,
   Download,
   LayoutDashboard,
@@ -29,6 +30,7 @@ const navItems = [
   { to: "/sessions", label: "Sessions", icon: Clock },
   { to: "/review", label: "Review", icon: RotateCcw },
   { to: "/goals", label: "Goals", icon: Target },
+  { to: "/plans", label: "Plans", icon: CalendarDays },
   { to: "/settings", label: "Settings", icon: Settings },
 ];
 

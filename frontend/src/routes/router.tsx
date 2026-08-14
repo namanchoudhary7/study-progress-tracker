@@ -8,6 +8,7 @@ import { SubjectDetailPage } from "../features/subjects/SubjectDetailPage";
 import { SessionsPage } from "../features/sessions/SessionsPage";
 import { ReviewPage } from "../features/review/ReviewPage";
 import { GoalsPage } from "../features/goals/GoalsPage";
+import { PlansPage } from "../features/plans/PlansPage";
 import { LoginPage } from "../features/auth/LoginPage";
 import { SignupPage } from "../features/auth/SignupPage";
 import { VerifyEmailPage } from "../features/auth/VerifyEmailPage";
@@ -33,6 +34,7 @@ export const router = createBrowserRouter([
           { path: "sessions", element: <SessionsPage /> },
           { path: "review", element: <ReviewPage /> },
           { path: "goals", element: <GoalsPage /> },
+          { path: "plans", element: <PlansPage /> },
           { path: "settings", element: <SettingsPage /> },
         ],
       },

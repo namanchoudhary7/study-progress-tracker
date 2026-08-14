@@ -1,4 +1,5 @@
 from app.models.goal import Goal
+from app.models.recurring_plan import RecurringPlan
 from app.models.resource import Resource
 from app.models.review import ReviewLog, ReviewSchedule
 from app.models.study_session import StudySession
@@ -9,6 +10,7 @@ from app.models.user import User
 
 __all__ = [
     "Goal",
+    "RecurringPlan",
     "Resource",
     "ReviewLog",
     "ReviewSchedule",

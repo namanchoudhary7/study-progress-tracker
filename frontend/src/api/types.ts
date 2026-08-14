@@ -57,6 +57,23 @@ export interface Resource {
   created_at: string;
 }
 
+export interface RecurringPlan {
+  id: number;
+  subject_id: number;
+  topic_id: number | null;
+  days_of_week: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TodayPlanItem {
+  id: number;
+  subject_id: number;
+  subject_name: string;
+  topic_id: number | null;
+  topic_name: string | null;
+}
+
 export interface Goal {
   id: number;
   subject_id: number | null;
