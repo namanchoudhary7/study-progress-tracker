@@ -1,19 +1,29 @@
+import { useState } from "react";
 import { CircleDot, ListTodo, X } from "lucide-react";
 import { useSubjects } from "../hooks/useSubjects";
 import { useTopics } from "../hooks/useTopics";
 import { useTimer } from "../context/TimerContext";
 import { IconButton } from "./ui/IconButton";
+import { Input } from "./ui/Input";
 
 export function TaskPickerModal({ onClose }: { onClose: () => void }) {
   const { data: subjects } = useSubjects();
   const { data: topics, isLoading } = useTopics();
   const { start } = useTimer();
+  const [pomodoroOn, setPomodoroOn] = useState(false);
+  const [workMinutes, setWorkMinutes] = useState("25");
+  const [breakMinutes, setBreakMinutes] = useState("5");
 
   const pending = (topics ?? []).filter((t) => t.status === "todo" || t.status === "in_progress");
   const subjectName = (id: number) => subjects?.find((s) => s.id === id)?.name ?? "—";
 
   function handlePick(topicId: number, topicName: string, subjectId: number) {
-    start({ subjectId, subjectName: subjectName(subjectId), topicId, topicName });
+    start(
+      { subjectId, subjectName: subjectName(subjectId), topicId, topicName },
+      pomodoroOn
+        ? { workMinutes: Number(workMinutes) || 25, breakMinutes: Number(breakMinutes) || 5 }
+        : undefined
+    );
     onClose();
   }
 
@@ -23,6 +33,41 @@ export function TaskPickerModal({ onClose }: { onClose: () => void }) {
         <div className="mb-3 flex items-center justify-between">
           <h2 className="font-semibold">Pick a task to start</h2>
           <IconButton icon={X} label="Close" onClick={onClose} />
+        </div>
+
+        <div className="mb-3 border-b border-neutral-200 pb-3 dark:border-neutral-800">
+          <label className="flex items-center gap-2 text-sm">
+            <input type="checkbox" checked={pomodoroOn} onChange={(e) => setPomodoroOn(e.target.checked)} />
+            Pomodoro mode
+          </label>
+          {pomodoroOn && (
+            <div className="mt-2 flex items-center gap-2 text-xs text-neutral-500">
+              <label className="flex items-center gap-1">
+                Work
+                <Input
+                  type="number"
+                  min={1}
+                  max={120}
+                  className="w-16"
+                  value={workMinutes}
+                  onChange={(e) => setWorkMinutes(e.target.value)}
+                />
+                min
+              </label>
+              <label className="flex items-center gap-1">
+                Break
+                <Input
+                  type="number"
+                  min={1}
+                  max={60}
+                  className="w-16"
+                  value={breakMinutes}
+                  onChange={(e) => setBreakMinutes(e.target.value)}
+                />
+                min
+              </label>
+            </div>
+          )}
         </div>
 
         {isLoading && <p className="text-sm text-neutral-500">Loading…</p>}

@@ -20,8 +20,23 @@ export function TimerWidget() {
               <p className="truncate text-sm font-medium">{timer.task.topicName}</p>
               <p className="truncate text-xs text-neutral-500">{timer.task.subjectName}</p>
             </div>
+            {timer.pomodoro && (
+              <span
+                className={`whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-medium ${
+                  timer.pomodoro.onBreak
+                    ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400"
+                    : "bg-blue-100 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400"
+                }`}
+              >
+                {timer.pomodoroPhaseLabel}
+              </span>
+            )}
             <span className="tabular-nums text-neutral-600 dark:text-neutral-400">{timer.elapsedLabel}</span>
-            {timer.isRunning ? (
+            {timer.pomodoro?.onBreak ? (
+              <Button size="sm" icon={Play} onClick={timer.skipBreak}>
+                Skip break
+              </Button>
+            ) : timer.isRunning ? (
               <Button size="sm" icon={Pause} onClick={timer.pause}>
                 Pause
               </Button>
