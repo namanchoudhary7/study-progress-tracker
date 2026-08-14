@@ -1,0 +1,22 @@
+name: Send progress digests
+
+on:
+  schedule:
+    - cron: "0 8 * * *"
+  workflow_dispatch: {}
+
+jobs:
+  send-digests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call internal digest endpoint
+        run: |
+          response=$(curl -s -o /tmp/body.json -w "%{http_code}" -X POST \
+            "https://study-tracker-backend-7kel.onrender.com/api/v1/internal/send-digests" \
+            -H "X-Internal-Secret: ${{ secrets.INTERNAL_API_SECRET }}")
+          echo "HTTP status: $response"
+          cat /tmp/body.json
+          if [ "$response" != "200" ]; then
+            echo "Digest call failed"
+            exit 1
+          fi
