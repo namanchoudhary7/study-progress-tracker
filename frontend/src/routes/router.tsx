@@ -2,6 +2,7 @@ import { createBrowserRouter } from "react-router-dom";
 import { Layout } from "../components/Layout";
 import { ProtectedRoute } from "../components/ProtectedRoute";
 import { NotFoundPage } from "../components/NotFoundPage";
+import { AgentPage } from "../features/agent/AgentPage";
 import { DashboardPage } from "../features/dashboard/DashboardPage";
 import { SubjectsPage } from "../features/subjects/SubjectsPage";
 import { SubjectDetailPage } from "../features/subjects/SubjectDetailPage";
@@ -29,6 +30,7 @@ export const router = createBrowserRouter([
         element: <Layout />,
         children: [
           { path: "dashboard", element: <DashboardPage /> },
+          { path: "agent", element: <AgentPage /> },
           { path: "subjects", element: <SubjectsPage /> },
           { path: "subjects/:id", element: <SubjectDetailPage /> },
           { path: "sessions", element: <SessionsPage /> },

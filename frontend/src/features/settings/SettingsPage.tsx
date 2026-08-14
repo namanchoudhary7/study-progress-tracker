@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { CheckCircle2, Copy, Trash2, X } from "lucide-react";
+import { CheckCircle2, Copy, KeyRound, Trash2, X } from "lucide-react";
 import { Card } from "../../components/Card";
 import { ErrorBanner } from "../../components/ErrorBanner";
 import { Badge } from "../../components/ui/Badge";
@@ -17,6 +17,7 @@ import {
   useRevokeShareLink,
   useUpdateProfile,
 } from "../../hooks/useAccount";
+import { useApiKeys, useCreateApiKey, useDeleteApiKey } from "../../hooks/useApiKeys";
 
 function EmailVerificationStatus() {
   const { user, resendVerification } = useAuth();
@@ -336,6 +337,96 @@ function SharingSection() {
   );
 }
 
+function ApiKeysSection() {
+  const { data: keys, isLoading } = useApiKeys();
+  const createKey = useCreateApiKey();
+  const deleteKey = useDeleteApiKey();
+  const [name, setName] = useState("");
+  const [newSecret, setNewSecret] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  function handleCreate(e: React.FormEvent) {
+    e.preventDefault();
+    if (!name.trim()) return;
+    createKey.mutate(name.trim(), {
+      onSuccess: (created) => {
+        setNewSecret(created.key);
+        setName("");
+      },
+    });
+  }
+
+  function handleCopy() {
+    if (!newSecret) return;
+    navigator.clipboard.writeText(newSecret);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
+
+  return (
+    <Card>
+      <h2 className="mb-1 font-semibold">MCP API keys</h2>
+      <p className="mb-3 text-sm text-neutral-500">
+        Connect Claude Desktop or Claude Code to your study data as a remote MCP server:{" "}
+        <code className="rounded bg-neutral-100 px-1 py-0.5 text-xs dark:bg-neutral-800">
+          claude mcp add --transport http &lt;server-url&gt;/mcp/ --header "Authorization: Bearer &lt;key&gt;"
+        </code>
+      </p>
+
+      {createKey.error && <div className="mb-3"><ErrorBanner message={createKey.error.message} /></div>}
+
+      {newSecret && (
+        <div className="mb-3 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm dark:border-amber-800 dark:bg-amber-950/40">
+          <p className="mb-2 font-medium">Copy this key now — you won't be able to see it again.</p>
+          <div className="flex items-center gap-2">
+            <Input className="flex-1 font-mono text-xs" readOnly value={newSecret} />
+            <IconButton icon={Copy} label="Copy key" onClick={handleCopy} />
+          </div>
+          {copied && <span className="mt-1 block text-green-600 dark:text-green-400">Copied!</span>}
+        </div>
+      )}
+
+      <form onSubmit={handleCreate} className="mb-3 flex items-center gap-2">
+        <Input
+          className="flex-1"
+          placeholder="Key name (e.g. Claude Desktop)"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+        <Button type="submit" variant="primary" icon={KeyRound} disabled={createKey.isPending || !name.trim()}>
+          Create key
+        </Button>
+      </form>
+
+      {!isLoading && keys?.length === 0 && <p className="text-sm text-neutral-500">No API keys yet.</p>}
+
+      {keys && keys.length > 0 && (
+        <ul className="space-y-2">
+          {keys.map((key) => (
+            <li
+              key={key.id}
+              className="flex items-center justify-between rounded-lg border border-neutral-200 px-3 py-2 text-sm dark:border-neutral-800"
+            >
+              <div>
+                <div className="font-medium">{key.name}</div>
+                <div className="text-xs text-neutral-500">
+                  {key.key_prefix}… · {key.last_used_at ? `last used ${new Date(key.last_used_at).toLocaleDateString()}` : "never used"}
+                </div>
+              </div>
+              <IconButton
+                icon={Trash2}
+                label="Revoke key"
+                onClick={() => deleteKey.mutate(key.id)}
+                disabled={deleteKey.isPending}
+              />
+            </li>
+          ))}
+        </ul>
+      )}
+    </Card>
+  );
+}
+
 function DangerZone() {
   const [modalOpen, setModalOpen] = useState(false);
   return (
@@ -357,6 +448,7 @@ export function SettingsPage() {
       <PasswordSection />
       <DigestSection />
       <SharingSection />
+      <ApiKeysSection />
       <DangerZone />
     </div>
   );

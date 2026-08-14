@@ -1,3 +1,4 @@
+from app.models.api_key import ApiKey
 from app.models.goal import Goal
 from app.models.recurring_plan import RecurringPlan
 from app.models.resource import Resource
@@ -9,6 +10,7 @@ from app.models.topic import Topic
 from app.models.user import User
 
 __all__ = [
+    "ApiKey",
     "Goal",
     "RecurringPlan",
     "Resource",
