@@ -5,7 +5,21 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from app.core.config import settings
 from app.core.cookies import CSRF_COOKIE
-from app.routers import auth, export, goals, public, resources, reviews, sessions, stats, subjects, tags, topics, users
+from app.routers import (
+    auth,
+    export,
+    goals,
+    internal,
+    public,
+    resources,
+    reviews,
+    sessions,
+    stats,
+    subjects,
+    tags,
+    topics,
+    users,
+)
 
 app = FastAPI(title="Study Progress Tracker API")
 
@@ -19,12 +33,12 @@ app.add_middleware(
 app.add_middleware(SessionMiddleware, secret_key=settings.jwt_secret, same_site="lax", https_only=settings.is_production)
 
 SAFE_METHODS = {"GET", "HEAD", "OPTIONS"}
-CSRF_EXEMPT_PREFIX = "/api/v1/auth"
+CSRF_EXEMPT_PREFIXES = ("/api/v1/auth", "/api/v1/internal")
 
 
 @app.middleware("http")
 async def csrf_protect(request: Request, call_next):
-    if request.method not in SAFE_METHODS and not request.url.path.startswith(CSRF_EXEMPT_PREFIX):
+    if request.method not in SAFE_METHODS and not request.url.path.startswith(CSRF_EXEMPT_PREFIXES):
         cookie_token = request.cookies.get(CSRF_COOKIE)
         header_token = request.headers.get("x-csrf-token")
         if not cookie_token or not header_token or cookie_token != header_token:
@@ -45,6 +59,7 @@ app.include_router(users.router, prefix=API_PREFIX)
 app.include_router(tags.router, prefix=API_PREFIX)
 app.include_router(resources.router, prefix=API_PREFIX)
 app.include_router(public.router, prefix=API_PREFIX)
+app.include_router(internal.router, prefix=API_PREFIX)
 
 
 @app.get("/health")

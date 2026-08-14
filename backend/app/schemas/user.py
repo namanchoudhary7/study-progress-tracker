@@ -2,6 +2,8 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
+from app.models.enums import DigestFrequency
+
 
 class UserCreate(BaseModel):
     email: EmailStr
@@ -26,6 +28,7 @@ class UserRead(BaseModel):
     email_verified: bool
     has_password: bool
     share_token: str | None
+    digest_frequency: DigestFrequency
 
 
 class AuthResponse(UserRead):
@@ -40,6 +43,7 @@ class UserUpdate(BaseModel):
     display_name: str | None = None
     username: str | None = Field(default=None, min_length=3, max_length=30, pattern=r"^[a-z0-9_]+$")
     email: EmailStr | None = None
+    digest_frequency: DigestFrequency | None = None
 
 
 class PasswordChangeRequest(BaseModel):

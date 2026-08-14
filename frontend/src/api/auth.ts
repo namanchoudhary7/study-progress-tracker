@@ -9,6 +9,7 @@ export interface AuthUser {
   email_verified: boolean;
   has_password: boolean;
   share_token: string | null;
+  digest_frequency: "off" | "weekly" | "monthly";
   csrf_token: string;
 }
 

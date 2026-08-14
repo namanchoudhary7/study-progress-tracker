@@ -22,3 +22,9 @@ class ReviewOutcome(str, enum.Enum):
 class ResourceType(str, enum.Enum):
     link = "link"
     note = "note"
+
+
+class DigestFrequency(str, enum.Enum):
+    off = "off"
+    weekly = "weekly"
+    monthly = "monthly"

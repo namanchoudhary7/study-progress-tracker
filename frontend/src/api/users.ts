@@ -1,5 +1,7 @@
 import { api } from "../lib/apiClient";
 
+export type DigestFrequency = "off" | "weekly" | "monthly";
+
 export interface UserProfile {
   id: number;
   email: string;
@@ -9,12 +11,14 @@ export interface UserProfile {
   email_verified: boolean;
   has_password: boolean;
   share_token: string | null;
+  digest_frequency: DigestFrequency;
 }
 
 export interface ProfileUpdate {
   display_name?: string | null;
   username?: string;
   email?: string;
+  digest_frequency?: DigestFrequency;
 }
 
 export const usersApi = {

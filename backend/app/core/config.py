@@ -21,6 +21,8 @@ class Settings(BaseSettings):
     resend_api_key: str = ""
     email_from: str = "Study Tracker <onboarding@resend.dev>"
 
+    internal_api_secret: str = ""
+
     @property
     def cors_origins_list(self) -> list[str]:
         return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]

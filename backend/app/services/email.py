@@ -30,3 +30,19 @@ def send_verification_email(user_id: int, email: str) -> None:
         "Verify your email",
         f'<p>Click to verify your Study Tracker email:</p><p><a href="{link}">{link}</a></p>',
     )
+
+
+def send_digest_email(email: str, period_label: str, topics_done: int, total_minutes: int, current_streak: int) -> None:
+    send_email(
+        email,
+        f"Your {period_label} study digest",
+        (
+            f"<p>Here's your {period_label} recap:</p>"
+            f"<ul>"
+            f"<li>{topics_done} topic(s) completed</li>"
+            f"<li>{total_minutes} minute(s) studied</li>"
+            f"<li>Current streak: {current_streak} day(s)</li>"
+            f"</ul>"
+            f'<p><a href="{settings.frontend_url}/dashboard">Open your dashboard</a></p>'
+        ),
+    )

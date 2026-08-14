@@ -7,7 +7,9 @@ import { Badge } from "../../components/ui/Badge";
 import { Button } from "../../components/ui/Button";
 import { IconButton } from "../../components/ui/IconButton";
 import { Input } from "../../components/ui/Input";
+import { Select } from "../../components/ui/Select";
 import { useAuth } from "../../context/AuthContext";
+import type { DigestFrequency } from "../../api/users";
 import {
   useChangePassword,
   useCreateShareLink,
@@ -251,6 +253,31 @@ function DeleteAccountModal({ onClose }: { onClose: () => void }) {
   );
 }
 
+function DigestSection() {
+  const { user } = useAuth();
+  const updateProfile = useUpdateProfile();
+
+  if (!user) return null;
+
+  return (
+    <Card>
+      <h2 className="mb-1 font-semibold">Progress digest email</h2>
+      <p className="mb-3 text-sm text-neutral-500">
+        Get an email recapping topics completed, minutes studied, and your streak.
+      </p>
+      <Select
+        value={user.digest_frequency}
+        onChange={(e) => updateProfile.mutate({ digest_frequency: e.target.value as DigestFrequency })}
+        disabled={updateProfile.isPending}
+      >
+        <option value="off">Off</option>
+        <option value="weekly">Weekly</option>
+        <option value="monthly">Monthly</option>
+      </Select>
+    </Card>
+  );
+}
+
 function SharingSection() {
   const { user } = useAuth();
   const createShareLink = useCreateShareLink();
@@ -328,6 +355,7 @@ export function SettingsPage() {
     <div className="max-w-lg space-y-6">
       <ProfileSection />
       <PasswordSection />
+      <DigestSection />
       <SharingSection />
       <DangerZone />
     </div>

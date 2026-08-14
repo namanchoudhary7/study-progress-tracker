@@ -180,6 +180,28 @@ def get_heatmap_year(db: Session, user_id: int, year: int) -> list[HeatmapCell]:
     ]
 
 
+def get_digest_stats(db: Session, user_id: int, since: date) -> dict[str, int]:
+    topics_done = (
+        db.scalar(
+            select(func.count())
+            .select_from(Topic)
+            .where(Topic.user_id == user_id, Topic.status == TopicStatus.done, Topic.completed_at >= since)
+        )
+        or 0
+    )
+    total_minutes = (
+        db.scalar(
+            select(func.coalesce(func.sum(StudySession.duration_minutes), 0)).where(
+                StudySession.user_id == user_id, StudySession.session_date >= since
+            )
+        )
+        or 0
+    )
+    current_streak = get_streaks(db, user_id).current_streak
+
+    return {"topics_done": topics_done, "total_minutes": total_minutes, "current_streak": current_streak}
+
+
 def get_available_years(db: Session, user_id: int) -> list[int]:
     years = set(
         db.scalars(
