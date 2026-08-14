@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { CheckCircle2, Trash2, X } from "lucide-react";
+import { CheckCircle2, Copy, Trash2, X } from "lucide-react";
 import { Card } from "../../components/Card";
 import { ErrorBanner } from "../../components/ErrorBanner";
 import { Badge } from "../../components/ui/Badge";
@@ -8,7 +8,13 @@ import { Button } from "../../components/ui/Button";
 import { IconButton } from "../../components/ui/IconButton";
 import { Input } from "../../components/ui/Input";
 import { useAuth } from "../../context/AuthContext";
-import { useChangePassword, useDeleteAccount, useUpdateProfile } from "../../hooks/useAccount";
+import {
+  useChangePassword,
+  useCreateShareLink,
+  useDeleteAccount,
+  useRevokeShareLink,
+  useUpdateProfile,
+} from "../../hooks/useAccount";
 
 function EmailVerificationStatus() {
   const { user, resendVerification } = useAuth();
@@ -245,6 +251,64 @@ function DeleteAccountModal({ onClose }: { onClose: () => void }) {
   );
 }
 
+function SharingSection() {
+  const { user } = useAuth();
+  const createShareLink = useCreateShareLink();
+  const revokeShareLink = useRevokeShareLink();
+  const [copied, setCopied] = useState(false);
+
+  if (!user) return null;
+
+  const shareUrl = user.share_token ? `${window.location.origin}/share/${user.share_token}` : null;
+
+  function handleCopy() {
+    if (!shareUrl) return;
+    navigator.clipboard.writeText(shareUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
+
+  return (
+    <Card>
+      <h2 className="mb-1 font-semibold">Sharing</h2>
+      <p className="mb-3 text-sm text-neutral-500">
+        Generate a read-only link showing your overall progress — no login required, no subject or topic details.
+      </p>
+      {shareUrl ? (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <Input className="flex-1" readOnly value={shareUrl} />
+            <IconButton icon={Copy} label="Copy link" onClick={handleCopy} />
+          </div>
+          {copied && <span className="text-sm text-green-600 dark:text-green-400">Copied!</span>}
+          <div className="flex gap-2">
+            <Button
+              variant="secondary"
+              size="sm"
+              disabled={createShareLink.isPending}
+              onClick={() => createShareLink.mutate()}
+            >
+              Regenerate
+            </Button>
+            <Button
+              variant="danger"
+              size="sm"
+              disabled={revokeShareLink.isPending}
+              onClick={() => revokeShareLink.mutate()}
+            >
+              Revoke
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <Button variant="primary" disabled={createShareLink.isPending} onClick={() => createShareLink.mutate()}>
+          Generate share link
+        </Button>
+      )}
+    </Card>
+  );
+}
+
 function DangerZone() {
   const [modalOpen, setModalOpen] = useState(false);
   return (
@@ -264,6 +328,7 @@ export function SettingsPage() {
     <div className="max-w-lg space-y-6">
       <ProfileSection />
       <PasswordSection />
+      <SharingSection />
       <DangerZone />
     </div>
   );

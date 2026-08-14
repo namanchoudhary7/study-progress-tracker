@@ -5,7 +5,7 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from app.core.config import settings
 from app.core.cookies import CSRF_COOKIE
-from app.routers import auth, export, goals, resources, reviews, sessions, stats, subjects, tags, topics, users
+from app.routers import auth, export, goals, public, resources, reviews, sessions, stats, subjects, tags, topics, users
 
 app = FastAPI(title="Study Progress Tracker API")
 
@@ -44,6 +44,7 @@ app.include_router(export.router, prefix=API_PREFIX)
 app.include_router(users.router, prefix=API_PREFIX)
 app.include_router(tags.router, prefix=API_PREFIX)
 app.include_router(resources.router, prefix=API_PREFIX)
+app.include_router(public.router, prefix=API_PREFIX)
 
 
 @app.get("/health")

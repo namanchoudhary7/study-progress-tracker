@@ -25,6 +25,7 @@ class UserRead(BaseModel):
     created_at: datetime
     email_verified: bool
     has_password: bool
+    share_token: str | None
 
 
 class AuthResponse(UserRead):

@@ -41,6 +41,7 @@ def _auth_response(user: User, csrf_token: str) -> AuthResponse:
         created_at=user.created_at,
         email_verified=user.email_verified,
         has_password=user.has_password,
+        share_token=user.share_token,
         csrf_token=csrf_token,
     )
 

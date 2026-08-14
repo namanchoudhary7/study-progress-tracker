@@ -8,6 +8,7 @@ export interface UserProfile {
   created_at: string;
   email_verified: boolean;
   has_password: boolean;
+  share_token: string | null;
 }
 
 export interface ProfileUpdate {
@@ -21,4 +22,6 @@ export const usersApi = {
   changePassword: (current_password: string, new_password: string) =>
     api.post<void>("/users/me/password", { current_password, new_password }),
   deleteMe: (data: { password?: string; confirmation?: string }) => api.delete<void>("/users/me", data),
+  createShareLink: () => api.post<UserProfile>("/users/me/share-link", {}),
+  revokeShareLink: () => api.delete<UserProfile>("/users/me/share-link"),
 };

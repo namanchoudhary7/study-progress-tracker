@@ -15,6 +15,7 @@ class User(Base, TimestampMixin):
     google_id: Mapped[str | None] = mapped_column(String(255), unique=True, index=True)
     display_name: Mapped[str | None] = mapped_column(String(200))
     email_verified: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="false")
+    share_token: Mapped[str | None] = mapped_column(String(32), unique=True, index=True)
 
     subjects: Mapped[list["Subject"]] = relationship(back_populates="user", cascade="all, delete-orphan")
     topics: Mapped[list["Topic"]] = relationship(back_populates="user", cascade="all, delete-orphan")

@@ -8,6 +8,7 @@ export interface AuthUser {
   created_at: string;
   email_verified: boolean;
   has_password: boolean;
+  share_token: string | null;
   csrf_token: string;
 }
 

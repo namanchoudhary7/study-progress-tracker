@@ -21,6 +21,26 @@ export function useChangePassword() {
   });
 }
 
+export function useCreateShareLink() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () => usersApi.createShareLink(),
+    onSuccess: (profile) => {
+      qc.setQueryData<AuthUser>(ME_KEY, (old) => (old ? { ...old, ...profile } : old));
+    },
+  });
+}
+
+export function useRevokeShareLink() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () => usersApi.revokeShareLink(),
+    onSuccess: (profile) => {
+      qc.setQueryData<AuthUser>(ME_KEY, (old) => (old ? { ...old, ...profile } : old));
+    },
+  });
+}
+
 export function useDeleteAccount() {
   const qc = useQueryClient();
   return useMutation({

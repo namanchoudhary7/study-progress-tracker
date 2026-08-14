@@ -13,12 +13,14 @@ import { SignupPage } from "../features/auth/SignupPage";
 import { VerifyEmailPage } from "../features/auth/VerifyEmailPage";
 import { LandingPage } from "../features/landing/LandingPage";
 import { SettingsPage } from "../features/settings/SettingsPage";
+import { SharePage } from "../features/share/SharePage";
 
 export const router = createBrowserRouter([
   { path: "/", element: <LandingPage /> },
   { path: "/login", element: <LoginPage /> },
   { path: "/signup", element: <SignupPage /> },
   { path: "/verify-email", element: <VerifyEmailPage /> },
+  { path: "/share/:token", element: <SharePage /> },
   {
     element: <ProtectedRoute />,
     children: [

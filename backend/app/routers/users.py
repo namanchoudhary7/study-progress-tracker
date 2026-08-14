@@ -1,3 +1,5 @@
+import secrets
+
 from fastapi import APIRouter, Depends, HTTPException, Response
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -73,3 +75,19 @@ def delete_me(
     db.delete(current_user)
     db.commit()
     clear_auth_cookies(response)
+
+
+@router.post("/me/share-link", response_model=UserRead)
+def create_share_link(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)) -> User:
+    current_user.share_token = secrets.token_urlsafe(16)
+    db.commit()
+    db.refresh(current_user)
+    return current_user
+
+
+@router.delete("/me/share-link", response_model=UserRead)
+def revoke_share_link(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)) -> User:
+    current_user.share_token = None
+    db.commit()
+    db.refresh(current_user)
+    return current_user
