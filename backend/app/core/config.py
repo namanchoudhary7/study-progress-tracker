@@ -27,10 +27,9 @@ class Settings(BaseSettings):
     openai_api_key: str = ""
     gemini_api_key: str = ""
     llm_provider_priority: str = "gemini"
-    gemini_model_priority: str = (
-        "gemini-3.7-flash,gemini-3.6-flash,gemini-3.5-flash,gemini-2.5-flash,"
-        "gemini-3.5-flash-lite,gemini-2.5-flash-lite"
-    )
+    # Full Flash tiers (3.7/3.6/3.5-flash) time out and 2.5-flash 404s on this API key's
+    # current access level — Lite variants are the only ones that actually respond.
+    gemini_model_priority: str = "gemini-3.5-flash-lite,gemini-2.5-flash-lite"
 
     @property
     def llm_provider_priority_list(self) -> list[str]:
