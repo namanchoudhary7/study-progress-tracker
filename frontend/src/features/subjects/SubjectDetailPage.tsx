@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
-import { ListChecks, Pencil, Tag as TagIcon, Trash2 } from "lucide-react";
+import { BookOpen, ListChecks, Pencil, Tag as TagIcon, Trash2 } from "lucide-react";
 import { Card } from "../../components/Card";
+import { ResourceModal } from "../../components/ResourceModal";
 import { TopicStatusBadge } from "../../components/StatusBadge";
 import { TagPickerModal } from "../../components/TagPickerModal";
 import { useToast } from "../../components/Toast";
@@ -34,6 +35,7 @@ function TopicRow({ topic }: { topic: Topic }) {
   const deleteTopic = useDeleteTopic();
   const [editing, setEditing] = useState(false);
   const [tagPickerOpen, setTagPickerOpen] = useState(false);
+  const [resourcesOpen, setResourcesOpen] = useState(false);
   const [name, setName] = useState(topic.name);
   const [notes, setNotes] = useState(topic.notes ?? "");
 
@@ -98,10 +100,12 @@ function TopicRow({ topic }: { topic: Topic }) {
           ))}
         </Select>
         <IconButton icon={TagIcon} label="Manage tags" onClick={() => setTagPickerOpen(true)} />
+        <IconButton icon={BookOpen} label="Manage resources" onClick={() => setResourcesOpen(true)} />
         <IconButton icon={Pencil} label="Edit topic" onClick={() => setEditing(true)} />
         <IconButton icon={Trash2} label="Delete topic" variant="danger" onClick={handleDelete} />
       </div>
       {tagPickerOpen && <TagPickerModal topic={topic} onClose={() => setTagPickerOpen(false)} />}
+      {resourcesOpen && <ResourceModal topic={topic} onClose={() => setResourcesOpen(false)} />}
     </Card>
   );
 }

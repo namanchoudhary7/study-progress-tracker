@@ -1,5 +1,6 @@
 export type TopicStatus = "todo" | "in_progress" | "done";
 export type GoalStatus = "open" | "completed" | "missed";
+export type ResourceType = "link" | "note";
 
 export interface Subject {
   id: number;
@@ -42,6 +43,16 @@ export interface StudySession {
   notes: string | null;
   created_at: string;
   updated_at: string;
+}
+
+export interface Resource {
+  id: number;
+  topic_id: number;
+  type: ResourceType;
+  title: string;
+  url: string | null;
+  content: string | null;
+  created_at: string;
 }
 
 export interface Goal {

@@ -39,7 +39,7 @@ function EmailVerificationStatus() {
   }
 
   return (
-    <Button size="sm" variant="secondary" onClick={handleClick} disabled={state === "sending"}>
+    <Button size="sm" variant="danger" onClick={handleClick} disabled={state === "sending"}>
       {state === "sending" ? "Sending…" : "Verify email"}
     </Button>
   );

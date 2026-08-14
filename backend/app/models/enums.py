@@ -17,3 +17,8 @@ class ReviewOutcome(str, enum.Enum):
     again = "again"
     good = "good"
     easy = "easy"
+
+
+class ResourceType(str, enum.Enum):
+    link = "link"
+    note = "note"

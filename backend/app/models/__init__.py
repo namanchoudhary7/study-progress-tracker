@@ -1,4 +1,5 @@
 from app.models.goal import Goal
+from app.models.resource import Resource
 from app.models.review import ReviewLog, ReviewSchedule
 from app.models.study_session import StudySession
 from app.models.subject import Subject
@@ -8,6 +9,7 @@ from app.models.user import User
 
 __all__ = [
     "Goal",
+    "Resource",
     "ReviewLog",
     "ReviewSchedule",
     "StudySession",
