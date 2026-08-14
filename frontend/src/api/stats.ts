@@ -43,6 +43,16 @@ export interface HeatmapCell {
   minutes: number;
 }
 
+export interface Badge {
+  key: string;
+  label: string;
+  description: string;
+  icon: string;
+  earned: boolean;
+  current: number;
+  target: number;
+}
+
 export const statsApi = {
   overview: () => api.get<OverviewStats>("/stats/overview"),
   completion: () => api.get<CompletionItem[]>("/stats/completion"),
@@ -52,4 +62,5 @@ export const statsApi = {
   overdue: () => api.get<OverdueSummary>("/stats/overdue"),
   heatmap: (year?: number) => api.get<HeatmapCell[]>(`/stats/heatmap${year ? `?year=${year}` : ""}`),
   heatmapYears: () => api.get<number[]>("/stats/heatmap/years"),
+  badges: () => api.get<Badge[]>("/stats/badges"),
 };

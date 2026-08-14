@@ -6,6 +6,7 @@ import { TimerWidget } from "../../components/TimerWidget";
 import { Button } from "../../components/ui/Button";
 import { useOverviewStats, useStreakStats } from "../../hooks/useStats";
 import { StatTile } from "./StatTile";
+import { BadgesStrip } from "./BadgesStrip";
 import { CompletionChart } from "./CompletionChart";
 import { TimeSpentChart } from "./TimeSpentChart";
 import { OverdueWidget } from "./OverdueWidget";
@@ -38,6 +39,11 @@ export function DashboardPage() {
           sub={streaks ? `Longest: ${streaks.longest_streak}` : undefined}
         />
       </div>
+
+      <Card>
+        <h2 className="mb-2 text-sm font-medium text-neutral-700 dark:text-neutral-300">Badges</h2>
+        <BadgesStrip />
+      </Card>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Card>

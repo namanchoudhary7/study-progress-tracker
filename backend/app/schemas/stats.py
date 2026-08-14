@@ -44,3 +44,13 @@ class OverdueSummary(BaseModel):
 class HeatmapCell(BaseModel):
     date: date
     minutes: int
+
+
+class BadgeRead(BaseModel):
+    key: str
+    label: str
+    description: str
+    icon: str
+    earned: bool
+    current: int
+    target: int

@@ -28,3 +28,7 @@ export function useHeatmapStats(year?: number) {
 export function useHeatmapYears() {
   return useQuery({ queryKey: ["stats", "heatmap", "years"], queryFn: statsApi.heatmapYears });
 }
+
+export function useBadges() {
+  return useQuery({ queryKey: ["stats", "badges"], queryFn: statsApi.badges });
+}
