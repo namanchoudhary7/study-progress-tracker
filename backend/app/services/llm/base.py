@@ -7,6 +7,9 @@ class ToolCall:
     id: str
     name: str
     arguments: dict[str, Any]
+    # Gemini-specific: must be echoed back verbatim on replay or it rejects the next turn.
+    # Other providers leave this None; it's opaque to everything except gemini_provider.py.
+    thought_signature: bytes | None = None
 
 
 @dataclass

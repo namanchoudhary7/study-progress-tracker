@@ -1,3 +1,4 @@
+import asyncio
 import json
 from typing import Any, AsyncIterator
 
@@ -6,7 +7,8 @@ from google.genai import errors, types
 
 from app.services.llm.base import LLMEvent, ProviderUnavailable, TextDelta, ToolCall, TurnComplete
 
-DEFAULT_MODEL = "gemini-flash-latest"
+DEFAULT_MODEL = "gemini-flash-lite-latest"
+REQUEST_TIMEOUT_SECONDS = 20
 
 
 class GeminiProvider:
@@ -35,18 +37,23 @@ class GeminiProvider:
             else None
         )
         try:
-            response = await self._client.aio.models.generate_content(
-                model=self._model,
-                contents=_to_gemini_contents(messages),
-                config=types.GenerateContentConfig(
-                    system_instruction=system,
-                    tools=gemini_tools,
-                    max_output_tokens=2048,
-                    automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True),
+            response = await asyncio.wait_for(
+                self._client.aio.models.generate_content(
+                    model=self._model,
+                    contents=_to_gemini_contents(messages),
+                    config=types.GenerateContentConfig(
+                        system_instruction=system,
+                        tools=gemini_tools,
+                        max_output_tokens=2048,
+                        automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True),
+                    ),
                 ),
+                timeout=REQUEST_TIMEOUT_SECONDS,
             )
         except errors.APIError as exc:
             raise ProviderUnavailable(str(exc)) from exc
+        except asyncio.TimeoutError as exc:
+            raise ProviderUnavailable(f"Timed out after {REQUEST_TIMEOUT_SECONDS}s") from exc
 
         text_parts: list[str] = []
         tool_calls: list[ToolCall] = []
@@ -56,7 +63,14 @@ class GeminiProvider:
                 text_parts.append(part.text)
             elif part.function_call:
                 fc = part.function_call
-                tool_calls.append(ToolCall(id=fc.id or fc.name, name=fc.name, arguments=dict(fc.args or {})))
+                tool_calls.append(
+                    ToolCall(
+                        id=fc.id or fc.name,
+                        name=fc.name,
+                        arguments=dict(fc.args or {}),
+                        thought_signature=part.thought_signature,
+                    )
+                )
 
         text = "".join(text_parts)
         if text:
@@ -75,7 +89,12 @@ def _to_gemini_contents(messages: list[dict[str, Any]]) -> list[types.Content]:
             if m.get("content"):
                 parts.append(types.Part(text=m["content"]))
             for tc in m.get("tool_calls", []):
-                parts.append(types.Part(function_call=types.FunctionCall(id=tc["id"], name=tc["name"], args=tc["arguments"])))
+                parts.append(
+                    types.Part(
+                        function_call=types.FunctionCall(id=tc["id"], name=tc["name"], args=tc["arguments"]),
+                        thought_signature=tc.get("thought_signature"),
+                    )
+                )
             out.append(types.Content(role="model", parts=parts))
         elif role == "tool":
             try:

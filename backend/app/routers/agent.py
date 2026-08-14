@@ -78,7 +78,13 @@ async def _run_agent(db: Session, user: User, messages: list[dict[str, Any]]) ->
                     "role": "assistant",
                     "content": final.text,
                     "tool_calls": [
-                        {"id": tc.id, "name": tc.name, "arguments": tc.arguments} for tc in final.tool_calls
+                        {
+                            "id": tc.id,
+                            "name": tc.name,
+                            "arguments": tc.arguments,
+                            "thought_signature": tc.thought_signature,
+                        }
+                        for tc in final.tool_calls
                     ],
                 }
             )

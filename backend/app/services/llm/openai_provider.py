@@ -15,7 +15,7 @@ class OpenAIProvider:
     name = "openai"
 
     def __init__(self, api_key: str, model: str = DEFAULT_MODEL) -> None:
-        self._client = openai.AsyncOpenAI(api_key=api_key)
+        self._client = openai.AsyncOpenAI(api_key=api_key, timeout=20.0, max_retries=1)
         self._model = model
 
     async def stream_chat(

@@ -11,7 +11,7 @@ class AnthropicProvider:
     name = "anthropic"
 
     def __init__(self, api_key: str, model: str = DEFAULT_MODEL) -> None:
-        self._client = anthropic.AsyncAnthropic(api_key=api_key)
+        self._client = anthropic.AsyncAnthropic(api_key=api_key, timeout=20.0)
         self._model = model
 
     async def stream_chat(
