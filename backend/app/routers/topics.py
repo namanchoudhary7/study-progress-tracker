@@ -117,12 +117,13 @@ def update_topic(
         if topic.status == TopicStatus.done and not was_done:
             topic.completed_at = datetime.now(timezone.utc)
             if topic.review_schedule is None:
+                initial_interval = topic.subject.sr_initial_interval_days or 1
                 db.add(
                     ReviewSchedule(
                         topic_id=topic.id,
                         user_id=current_user.id,
-                        interval_days=1,
-                        next_review_date=(datetime.now(timezone.utc) + timedelta(days=1)).date(),
+                        interval_days=initial_interval,
+                        next_review_date=(datetime.now(timezone.utc) + timedelta(days=initial_interval)).date(),
                     )
                 )
         elif topic.status != TopicStatus.done:

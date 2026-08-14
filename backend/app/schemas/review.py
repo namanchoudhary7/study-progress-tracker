@@ -3,6 +3,7 @@ from datetime import date, datetime
 from pydantic import BaseModel, ConfigDict
 
 from app.models.enums import ReviewOutcome
+from app.schemas.resource import ResourceRead
 
 
 class ReviewScheduleRead(BaseModel):
@@ -19,11 +20,13 @@ class ReviewScheduleRead(BaseModel):
 class DueReviewItem(BaseModel):
     topic_id: int
     topic_name: str
+    topic_notes: str | None
     subject_id: int
     subject_name: str
     next_review_date: date
     interval_days: int
     review_count: int
+    resources: list[ResourceRead]
 
 
 class ReviewLogRead(BaseModel):

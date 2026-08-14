@@ -24,6 +24,9 @@ function SubjectRow({ subject }: { subject: Subject }) {
   const [name, setName] = useState(subject.name);
   const [description, setDescription] = useState(subject.description ?? "");
   const [color, setColor] = useState(subject.color ?? DEFAULT_COLOR);
+  const [srOpen, setSrOpen] = useState(false);
+  const [srInterval, setSrInterval] = useState(subject.sr_initial_interval_days?.toString() ?? "");
+  const [srEase, setSrEase] = useState(subject.sr_ease_factor?.toString() ?? "");
 
   const total = topics?.length ?? 0;
   const done = topics?.filter((t) => t.status === "done").length ?? 0;
@@ -32,7 +35,16 @@ function SubjectRow({ subject }: { subject: Subject }) {
   function handleSave(e: React.FormEvent) {
     e.preventDefault();
     updateSubject.mutate(
-      { id: subject.id, data: { name, description: description || null, color } },
+      {
+        id: subject.id,
+        data: {
+          name,
+          description: description || null,
+          color,
+          sr_initial_interval_days: srInterval ? Number(srInterval) : null,
+          sr_ease_factor: srEase ? Number(srEase) : null,
+        },
+      },
       { onSuccess: () => setEditing(false) }
     );
   }
@@ -49,26 +61,67 @@ function SubjectRow({ subject }: { subject: Subject }) {
   if (editing) {
     return (
       <Card>
-        <form onSubmit={handleSave} className="flex flex-wrap items-center gap-2">
-          <input
-            type="color"
-            value={color}
-            onChange={(e) => setColor(e.target.value)}
-            className="h-8 w-8 cursor-pointer rounded-lg border border-neutral-300 dark:border-neutral-700"
-          />
-          <Input value={name} onChange={(e) => setName(e.target.value)} />
-          <Input
-            className="flex-1"
-            placeholder="Description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-          />
-          <Button type="submit" variant="primary" size="sm">
-            Save
-          </Button>
-          <Button type="button" variant="secondary" size="sm" onClick={() => setEditing(false)}>
-            Cancel
-          </Button>
+        <form onSubmit={handleSave} className="space-y-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <input
+              type="color"
+              value={color}
+              onChange={(e) => setColor(e.target.value)}
+              className="h-8 w-8 cursor-pointer rounded-lg border border-neutral-300 dark:border-neutral-700"
+            />
+            <Input value={name} onChange={(e) => setName(e.target.value)} />
+            <Input
+              className="flex-1"
+              placeholder="Description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
+            <Button type="submit" variant="primary" size="sm">
+              Save
+            </Button>
+            <Button type="button" variant="secondary" size="sm" onClick={() => setEditing(false)}>
+              Cancel
+            </Button>
+          </div>
+
+          <div className="border-t border-neutral-200 pt-3 dark:border-neutral-800">
+            <button
+              type="button"
+              onClick={() => setSrOpen((o) => !o)}
+              className="text-xs text-neutral-500 hover:underline"
+            >
+              {srOpen ? "Hide" : "Show"} spaced repetition settings
+            </button>
+            {srOpen && (
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                <label className="flex items-center gap-1 text-xs text-neutral-500">
+                  Initial interval (days)
+                  <Input
+                    type="number"
+                    min={1}
+                    max={90}
+                    className="w-20"
+                    placeholder="1"
+                    value={srInterval}
+                    onChange={(e) => setSrInterval(e.target.value)}
+                  />
+                </label>
+                <label className="flex items-center gap-1 text-xs text-neutral-500">
+                  Ease factor
+                  <Input
+                    type="number"
+                    min={1.1}
+                    max={5}
+                    step={0.1}
+                    className="w-20"
+                    placeholder="2.0"
+                    value={srEase}
+                    onChange={(e) => setSrEase(e.target.value)}
+                  />
+                </label>
+              </div>
+            )}
+          </div>
         </form>
       </Card>
     );

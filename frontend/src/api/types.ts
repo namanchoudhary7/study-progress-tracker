@@ -8,6 +8,8 @@ export interface Subject {
   description: string | null;
   color: string | null;
   target_date: string | null;
+  sr_initial_interval_days: number | null;
+  sr_ease_factor: number | null;
   created_at: string;
   updated_at: string;
 }
