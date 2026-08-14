@@ -9,6 +9,7 @@ from app.routers import (
     auth,
     export,
     goals,
+    import_,
     internal,
     plans,
     public,
@@ -62,6 +63,7 @@ app.include_router(resources.router, prefix=API_PREFIX)
 app.include_router(public.router, prefix=API_PREFIX)
 app.include_router(internal.router, prefix=API_PREFIX)
 app.include_router(plans.router, prefix=API_PREFIX)
+app.include_router(import_.router, prefix=API_PREFIX)
 
 
 @app.get("/health")

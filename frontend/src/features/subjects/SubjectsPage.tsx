@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
-import { BookOpen, Pencil, Trash2 } from "lucide-react";
+import { BookOpen, Pencil, Trash2, Upload } from "lucide-react";
 import { Card } from "../../components/Card";
 import { ErrorBanner } from "../../components/ErrorBanner";
+import { ImportCsvModal } from "../../components/ImportCsvModal";
 import { useToast } from "../../components/Toast";
 import { Button } from "../../components/ui/Button";
 import { IconButton } from "../../components/ui/IconButton";
@@ -160,6 +161,7 @@ export function SubjectsPage() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [color, setColor] = useState(DEFAULT_COLOR);
+  const [importOpen, setImportOpen] = useState(false);
 
   function handleCreate(e: React.FormEvent) {
     e.preventDefault();
@@ -190,8 +192,13 @@ export function SubjectsPage() {
           <Button type="submit" variant="primary" disabled={createSubject.isPending}>
             Add subject
           </Button>
+          <Button type="button" variant="secondary" icon={Upload} onClick={() => setImportOpen(true)}>
+            Import CSV
+          </Button>
         </form>
       </Card>
+
+      {importOpen && <ImportCsvModal onClose={() => setImportOpen(false)} />}
 
       {isError && <ErrorBanner message={error.message} onRetry={() => refetch()} />}
       {isLoading && <p className="text-sm text-neutral-500">Loading…</p>}
