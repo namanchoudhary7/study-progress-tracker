@@ -23,6 +23,15 @@ class Settings(BaseSettings):
 
     internal_api_secret: str = ""
 
+    anthropic_api_key: str = ""
+    openai_api_key: str = ""
+    gemini_api_key: str = ""
+    llm_provider_priority: str = "gemini"
+
+    @property
+    def llm_provider_priority_list(self) -> list[str]:
+        return [p.strip() for p in self.llm_provider_priority.split(",") if p.strip()]
+
     @property
     def cors_origins_list(self) -> list[str]:
         return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]

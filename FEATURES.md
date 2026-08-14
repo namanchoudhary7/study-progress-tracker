@@ -90,5 +90,18 @@ A plain-language walkthrough of what this app does and how it's built. Written f
 
 **How it works:** Every time any part of the app successfully fetches data from the server, the timestamp of that fetch updates the label — so it reflects real activity, not a fixed refresh schedule.
 
----
-*(A section for future AI Insights will be added once that feature is built.)*
+## AI Study Coach
+
+**What it does:** A chat page ("Coach" in the nav) where you can ask about your progress, log study sessions in plain English, get a study plan built from your subjects/topics/goals, or ask for help preparing for a spaced-repetition review — all grounded in your real data instead of guesses.
+
+**Why it's useful:** Most of the app's insight lives in charts and lists you have to go find. The coach can pull the same data together on demand, in response to whatever you actually ask, and can act on your data too (log a session, mark a topic done, create a goal) instead of just describing it.
+
+**How it works:** Every question is answered using a fixed set of tools — one per read/write operation (list subjects, log a session, get due reviews, etc.) — so the assistant can only ever see or change data that already belongs to the signed-in user; it never invents numbers. Behind those tools sits a small router that tries one LLM provider first (Anthropic by default) and automatically fails over to a backup provider if the first one is rate-limited or unavailable, so a single provider outage doesn't take the coach down.
+
+## MCP Server (Claude Desktop / Claude Code access)
+
+**What it does:** Generate a personal API key in Settings, then connect your own study data to Claude Desktop or Claude Code as a remote MCP server — the same tools the in-app coach uses become available to your own Claude client directly.
+
+**Why it's useful:** Some people would rather ask their everyday AI assistant than open a separate app. This exposes the exact same data and actions there, without giving up per-user isolation — a key only ever unlocks the account that created it.
+
+**How it works:** The API key is a random secret, stored only as a hash (never in plain text) — you're shown the full key once, at creation time. Requests to the MCP server carry it as `Authorization: Bearer <key>`; the server verifies it, resolves it to your account, and every tool call is scoped to that account exactly like every other endpoint in the app.

@@ -1,3 +1,5 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -5,7 +7,10 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from app.core.config import settings
 from app.core.cookies import CSRF_COOKIE
+from app.mcp_server import mcp_app
 from app.routers import (
+    agent,
+    api_keys,
     auth,
     export,
     goals,
@@ -23,7 +28,16 @@ from app.routers import (
     users,
 )
 
-app = FastAPI(title="Study Progress Tracker API")
+mcp_asgi_app = mcp_app.streamable_http_app()
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    async with mcp_app.session_manager.run():
+        yield
+
+
+app = FastAPI(title="Study Progress Tracker API", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -35,7 +49,7 @@ app.add_middleware(
 app.add_middleware(SessionMiddleware, secret_key=settings.jwt_secret, same_site="lax", https_only=settings.is_production)
 
 SAFE_METHODS = {"GET", "HEAD", "OPTIONS"}
-CSRF_EXEMPT_PREFIXES = ("/api/v1/auth", "/api/v1/internal")
+CSRF_EXEMPT_PREFIXES = ("/api/v1/auth", "/api/v1/internal", "/mcp")
 
 
 @app.middleware("http")
@@ -64,6 +78,10 @@ app.include_router(public.router, prefix=API_PREFIX)
 app.include_router(internal.router, prefix=API_PREFIX)
 app.include_router(plans.router, prefix=API_PREFIX)
 app.include_router(import_.router, prefix=API_PREFIX)
+app.include_router(agent.router, prefix=API_PREFIX)
+app.include_router(api_keys.router, prefix=API_PREFIX)
+
+app.mount("/mcp", mcp_asgi_app)
 
 
 @app.get("/health")

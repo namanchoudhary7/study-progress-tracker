@@ -1,52 +1,14 @@
-from datetime import datetime, timedelta, timezone
-
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import func, select
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
+from app.agent_tools import topics as tools
 from app.core.database import get_db
 from app.dependencies.auth import get_current_user
-from app.models.enums import TopicStatus
-from app.models.review import ReviewSchedule
-from app.models.subject import Subject
-from app.models.tag import Tag
 from app.models.topic import Topic
 from app.models.user import User
 from app.schemas.topic import TopicBulkCreate, TopicCreate, TopicRead, TopicUpdate
 
 router = APIRouter(prefix="/topics", tags=["topics"])
-
-
-def _get_topic_or_404(db: Session, topic_id: int, current_user: User) -> Topic:
-    topic = db.scalar(select(Topic).where(Topic.id == topic_id, Topic.user_id == current_user.id))
-    if topic is None:
-        raise HTTPException(status_code=404, detail="Topic not found")
-    return topic
-
-
-def _get_owned_tags(db: Session, tag_ids: list[int], current_user: User) -> list[Tag]:
-    if not tag_ids:
-        return []
-    tags = list(db.scalars(select(Tag).where(Tag.id.in_(tag_ids), Tag.user_id == current_user.id)))
-    if len(tags) != len(set(tag_ids)):
-        raise HTTPException(status_code=404, detail="One or more tags not found")
-    return tags
-
-
-def _validate_parent(
-    db: Session, parent_topic_id: int, subject_id: int, current_user: User, exclude_topic_id: int | None = None
-) -> None:
-    parent = db.scalar(select(Topic).where(Topic.id == parent_topic_id, Topic.user_id == current_user.id))
-    if parent is None:
-        raise HTTPException(status_code=404, detail="Parent topic not found")
-    if parent.subject_id != subject_id:
-        raise HTTPException(status_code=400, detail="Parent topic must belong to the same subject")
-    if exclude_topic_id is not None:
-        cursor = parent
-        while cursor is not None:
-            if cursor.id == exclude_topic_id:
-                raise HTTPException(status_code=400, detail="A topic cannot be nested under itself or its own descendant")
-            cursor = cursor.parent
 
 
 @router.get("", response_model=list[TopicRead])
@@ -55,63 +17,26 @@ def list_topics(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> list[Topic]:
-    stmt = select(Topic).where(Topic.user_id == current_user.id).order_by(Topic.order_index, Topic.id)
-    if subject_id is not None:
-        stmt = stmt.where(Topic.subject_id == subject_id)
-    return list(db.scalars(stmt))
+    return tools.list_topics(db, current_user, subject_id=subject_id)
 
 
 @router.post("", response_model=TopicRead, status_code=201)
 def create_topic(
     payload: TopicCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)
 ) -> Topic:
-    owns_subject = db.scalar(
-        select(Subject.id).where(Subject.id == payload.subject_id, Subject.user_id == current_user.id)
-    )
-    if owns_subject is None:
-        raise HTTPException(status_code=404, detail="Subject not found")
-    if payload.parent_topic_id is not None:
-        _validate_parent(db, payload.parent_topic_id, payload.subject_id, current_user)
-    topic = Topic(**payload.model_dump(exclude={"tag_ids"}), user_id=current_user.id)
-    if payload.tag_ids is not None:
-        topic.tags = _get_owned_tags(db, payload.tag_ids, current_user)
-    db.add(topic)
-    db.commit()
-    db.refresh(topic)
-    return topic
+    return tools.create_topic(db, current_user, **payload.model_dump())
 
 
 @router.post("/bulk", response_model=list[TopicRead], status_code=201)
 def bulk_create_topics(
     payload: TopicBulkCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)
 ) -> list[Topic]:
-    owns_subject = db.scalar(
-        select(Subject.id).where(Subject.id == payload.subject_id, Subject.user_id == current_user.id)
-    )
-    if owns_subject is None:
-        raise HTTPException(status_code=404, detail="Subject not found")
-
-    names = [line.strip() for line in payload.text.splitlines() if line.strip()]
-    if not names:
-        return []
-
-    next_order = db.scalar(
-        select(func.coalesce(func.max(Topic.order_index), -1) + 1).where(Topic.subject_id == payload.subject_id)
-    )
-    topics = [
-        Topic(subject_id=payload.subject_id, user_id=current_user.id, name=name, order_index=next_order + i)
-        for i, name in enumerate(names)
-    ]
-    db.add_all(topics)
-    db.commit()
-    for topic in topics:
-        db.refresh(topic)
-    return topics
+    return tools.bulk_create_topics(db, current_user, payload.subject_id, payload.text)
 
 
 @router.get("/{topic_id}", response_model=TopicRead)
 def get_topic(topic_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)) -> Topic:
-    return _get_topic_or_404(db, topic_id, current_user)
+    return tools.get_topic(db, current_user, topic_id)
 
 
 @router.patch("/{topic_id}", response_model=TopicRead)
@@ -121,44 +46,11 @@ def update_topic(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> Topic:
-    topic = _get_topic_or_404(db, topic_id, current_user)
-    updates = payload.model_dump(exclude_unset=True, exclude={"tag_ids"})
-
-    if "parent_topic_id" in updates and updates["parent_topic_id"] is not None:
-        _validate_parent(db, updates["parent_topic_id"], topic.subject_id, current_user, exclude_topic_id=topic.id)
-
-    was_done = topic.status == TopicStatus.done
-    for field, value in updates.items():
-        setattr(topic, field, value)
-
-    if payload.tag_ids is not None:
-        topic.tags = _get_owned_tags(db, payload.tag_ids, current_user)
-
-    if "status" in updates:
-        if topic.status == TopicStatus.done and not was_done:
-            topic.completed_at = datetime.now(timezone.utc)
-            if topic.review_schedule is None:
-                initial_interval = topic.subject.sr_initial_interval_days or 1
-                db.add(
-                    ReviewSchedule(
-                        topic_id=topic.id,
-                        user_id=current_user.id,
-                        interval_days=initial_interval,
-                        next_review_date=(datetime.now(timezone.utc) + timedelta(days=initial_interval)).date(),
-                    )
-                )
-        elif topic.status != TopicStatus.done:
-            topic.completed_at = None
-
-    db.commit()
-    db.refresh(topic)
-    return topic
+    return tools.update_topic(db, current_user, topic_id, **payload.model_dump(exclude_unset=True))
 
 
 @router.delete("/{topic_id}", status_code=204)
 def delete_topic(
     topic_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)
 ) -> None:
-    topic = _get_topic_or_404(db, topic_id, current_user)
-    db.delete(topic)
-    db.commit()
+    tools.delete_topic(db, current_user, topic_id)
