@@ -92,7 +92,9 @@ async def _run_agent(db: Session, user: User, messages: list[dict[str, Any]]) ->
                     logger.warning("Tool %s failed: %s", tc.name, exc)
                     result = {"error": str(exc)}
                 yield _sse("tool_result", {"name": tc.name, "result": result})
-                working_messages.append({"role": "tool", "tool_call_id": tc.id, "content": json.dumps(result)})
+                working_messages.append(
+                    {"role": "tool", "tool_call_id": tc.id, "name": tc.name, "content": json.dumps(result)}
+                )
 
         yield _sse("error", {"message": "The assistant used too many tool calls without finishing. Try rephrasing."})
     except Exception as exc:  # noqa: BLE001 — surfaced to the client as a stream event, not a raw 500

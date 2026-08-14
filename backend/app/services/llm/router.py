@@ -4,6 +4,7 @@ from typing import Any, AsyncIterator
 from app.core.config import settings
 from app.services.llm.anthropic_provider import AnthropicProvider
 from app.services.llm.base import LLMEvent, LLMProvider, ProviderUnavailable
+from app.services.llm.gemini_provider import GeminiProvider
 from app.services.llm.openai_provider import OpenAIProvider
 
 logger = logging.getLogger(__name__)
@@ -11,6 +12,7 @@ logger = logging.getLogger(__name__)
 _PROVIDER_FACTORIES = {
     "anthropic": lambda: AnthropicProvider(api_key=settings.anthropic_api_key) if settings.anthropic_api_key else None,
     "openai": lambda: OpenAIProvider(api_key=settings.openai_api_key) if settings.openai_api_key else None,
+    "gemini": lambda: GeminiProvider(api_key=settings.gemini_api_key) if settings.gemini_api_key else None,
 }
 
 
