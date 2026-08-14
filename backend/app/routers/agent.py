@@ -53,10 +53,10 @@ def _sse(event: str, data: dict[str, Any]) -> str:
 
 
 async def _run_agent(db: Session, user: User, messages: list[dict[str, Any]]) -> AsyncIterator[str]:
-    llm_router = build_default_router()
     working_messages = list(messages)
 
     try:
+        llm_router = build_default_router()
         for _ in range(MAX_TOOL_ITERATIONS):
             final: TurnComplete | None = None
             async for event in llm_router.stream_chat(working_messages, TOOL_SPECS, SYSTEM_PROMPT):
