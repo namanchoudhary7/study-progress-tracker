@@ -22,5 +22,5 @@ class Subject(Base, TimestampMixin):
 
     user: Mapped["User"] = relationship(back_populates="subjects")
     topics: Mapped[list["Topic"]] = relationship(back_populates="subject", cascade="all, delete-orphan")
-    study_sessions: Mapped[list["StudySession"]] = relationship(back_populates="subject")
-    goals: Mapped[list["Goal"]] = relationship(back_populates="subject")
+    study_sessions: Mapped[list["StudySession"]] = relationship(back_populates="subject", cascade="all, delete-orphan")
+    goals: Mapped[list["Goal"]] = relationship(back_populates="subject", cascade="all, delete-orphan")

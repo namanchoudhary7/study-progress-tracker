@@ -33,7 +33,7 @@ class Topic(Base, TimestampMixin):
     parent: Mapped["Topic | None"] = relationship(back_populates="children", remote_side="Topic.id")
     children: Mapped[list["Topic"]] = relationship(back_populates="parent", cascade="all, delete-orphan")
     study_sessions: Mapped[list["StudySession"]] = relationship(back_populates="topic")
-    goals: Mapped[list["Goal"]] = relationship(back_populates="topic")
+    goals: Mapped[list["Goal"]] = relationship(back_populates="topic", cascade="all, delete-orphan")
     review_schedule: Mapped["ReviewSchedule | None"] = relationship(
         back_populates="topic", uselist=False, cascade="all, delete-orphan"
     )
