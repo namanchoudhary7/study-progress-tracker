@@ -1,5 +1,6 @@
 import json
 import logging
+from datetime import date
 from typing import Any, AsyncIterator
 
 from fastapi import APIRouter, Depends
@@ -20,9 +21,12 @@ router = APIRouter(prefix="/agent", tags=["agent"])
 
 MAX_TOOL_ITERATIONS = 8
 
-SYSTEM_PROMPT = """\
+def _system_prompt() -> str:
+    today = date.today().isoformat()
+    return f"""\
 You are the study coach built into the Study Progress Tracker app, talking to the currently \
-signed-in user about their own data. You can:
+signed-in user about their own data. Today's date is {today} (server clock, UTC) — use this for \
+"today"/"yesterday"/relative-date requests instead of guessing. You can:
 - act as a study coach: surface time imbalances, overdue goals, review backlog, and give advice
 - perform natural-language data entry: log sessions, create/update subjects, topics, goals, tags, plans
 - help plan and adjust study schedules given the user's subjects, topics, and goals
@@ -59,7 +63,7 @@ async def _run_agent(db: Session, user: User, messages: list[dict[str, Any]]) ->
         llm_router = build_default_router()
         for _ in range(MAX_TOOL_ITERATIONS):
             final: TurnComplete | None = None
-            async for event in llm_router.stream_chat(working_messages, TOOL_SPECS, SYSTEM_PROMPT):
+            async for event in llm_router.stream_chat(working_messages, TOOL_SPECS, _system_prompt()):
                 if isinstance(event, TextDelta):
                     yield _sse("delta", {"text": event.text})
                 elif isinstance(event, TurnComplete):
