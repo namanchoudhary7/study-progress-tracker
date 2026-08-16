@@ -58,6 +58,14 @@ export interface Resource {
   created_at: string;
 }
 
+export interface Flashcard {
+  id: number;
+  topic_id: number;
+  question: string;
+  answer: string;
+  created_at: string;
+}
+
 export interface RecurringPlan {
   id: number;
   subject_id: number;
