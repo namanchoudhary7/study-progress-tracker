@@ -3,6 +3,7 @@ import { Bot, Send, Wrench } from "lucide-react";
 import { Card } from "../../components/Card";
 import { ErrorBanner } from "../../components/ErrorBanner";
 import { Button } from "../../components/ui/Button";
+import { Badge } from "../../components/ui/Badge";
 import { Textarea } from "../../components/ui/Textarea";
 import { streamChat, type ChatMessage } from "../../api/agent";
 
@@ -76,7 +77,7 @@ export function AgentPage() {
       <div className="flex-1 space-y-4 overflow-y-auto pb-4">
         {messages.length === 0 && (
           <Card className="text-sm text-neutral-500">
-            <p className="mb-3 flex items-center gap-2 font-medium text-neutral-700 dark:text-neutral-300">
+            <p className="mb-3 flex items-center gap-2 font-mono-label text-neutral-500 dark:text-neutral-400">
               <Bot className="h-4 w-4" /> Ask about your study data, log sessions, or plan ahead.
             </p>
             <div className="flex flex-wrap gap-2">
@@ -92,21 +93,21 @@ export function AgentPage() {
         {messages.map((m, i) => (
           <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
             <div
-              className={`max-w-[85%] rounded-lg px-3 py-2 text-sm whitespace-pre-wrap ${
+              className={`max-w-[85%] rounded-md px-3 py-2 text-sm whitespace-pre-wrap ${
                 m.role === "user"
-                  ? "bg-blue-600 text-white"
+                  ? "bg-accent-600 text-white"
                   : "border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900"
               }`}
             >
               {m.toolCalls && m.toolCalls.length > 0 && (
                 <div className="mb-1 flex flex-wrap gap-1">
                   {m.toolCalls.map((name, j) => (
-                    <span
+                    <Badge
                       key={j}
-                      className="inline-flex items-center gap-1 rounded bg-neutral-100 px-1.5 py-0.5 text-[10px] text-neutral-500 dark:bg-neutral-800"
+                      className="gap-1 border-neutral-300 bg-neutral-100 text-neutral-500 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-400"
                     >
                       <Wrench className="h-2.5 w-2.5" /> {name}
-                    </span>
+                    </Badge>
                   ))}
                 </div>
               )}

@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { GraduationCap } from "lucide-react";
+import { Terminal } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
 export function BrandLogo({ className }: { className?: string }) {
@@ -9,8 +9,12 @@ export function BrandLogo({ className }: { className?: string }) {
       to={isAuthenticated ? "/dashboard" : "/"}
       className={className ?? "flex items-center gap-2 text-neutral-900 dark:text-neutral-100"}
     >
-      <GraduationCap className="h-6 w-6" />
-      <span className="text-lg font-semibold">Study Tracker</span>
+      <span className="flex h-7 w-7 items-center justify-center rounded-md border border-accent-500/50 bg-accent-500/10 text-accent-600 dark:text-accent-400">
+        <Terminal className="h-4 w-4" />
+      </span>
+      <span className="font-mono text-sm font-semibold tracking-tight">
+        study<span className="text-accent-600 dark:text-accent-400">.</span>tracker
+      </span>
     </Link>
   );
 }

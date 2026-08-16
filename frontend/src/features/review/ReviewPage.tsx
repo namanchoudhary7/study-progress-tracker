@@ -8,7 +8,7 @@ import type { DueReviewItem, ReviewOutcome } from "../../api/reviews";
 
 const OUTCOMES: { value: ReviewOutcome; label: string; className: string }[] = [
   { value: "again", label: "Again", className: "bg-red-600 hover:bg-red-700" },
-  { value: "good", label: "Good", className: "bg-blue-600 hover:bg-blue-700" },
+  { value: "good", label: "Good", className: "bg-accent-600 hover:bg-accent-700" },
   { value: "easy", label: "Easy", className: "bg-emerald-600 hover:bg-emerald-700" },
 ];
 
@@ -44,7 +44,7 @@ function ReviewCard({
       </div>
 
       {revealed && (
-        <div className="space-y-2 rounded-lg bg-neutral-50 p-3 text-sm dark:bg-neutral-900">
+        <div className="space-y-2 rounded-md bg-neutral-50 p-3 text-sm dark:bg-neutral-900">
           {!hasAnswer && <p className="text-neutral-500">No notes or resources saved for this topic.</p>}
           {item.topic_notes && <p className="whitespace-pre-wrap">{item.topic_notes}</p>}
           {item.resources.length > 0 && (
@@ -52,7 +52,7 @@ function ReviewCard({
               {item.resources.map((r) => (
                 <li key={r.id}>
                   {r.type === "link" ? (
-                    <a href={r.url ?? undefined} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline dark:text-blue-400">
+                    <a href={r.url ?? undefined} target="_blank" rel="noreferrer" className="text-accent-600 hover:underline dark:text-accent-400">
                       {r.title}
                     </a>
                   ) : (
@@ -73,7 +73,7 @@ function ReviewCard({
           {OUTCOMES.map((o) => (
             <button
               key={o.value}
-              className={`rounded-lg px-3 py-1.5 text-sm font-medium text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${o.className}`}
+              className={`rounded-md px-3 py-1.5 text-sm font-medium text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${o.className}`}
               disabled={isPending}
               onClick={() => onComplete(o.value)}
             >

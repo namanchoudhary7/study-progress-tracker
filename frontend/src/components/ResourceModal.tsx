@@ -28,7 +28,7 @@ export function ResourceModal({ topic, onClose }: { topic: Topic; onClose: () =>
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-      <div className="w-full max-w-md rounded-lg border border-neutral-200 bg-white p-4 shadow-xl dark:border-neutral-800 dark:bg-neutral-900">
+      <div className="relative w-full max-w-md rounded-md border border-neutral-200 bg-white p-4 shadow-xl before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-accent-500/60 before:to-transparent dark:border-neutral-800 dark:bg-neutral-900">
         <div className="mb-3 flex items-center justify-between">
           <h2 className="font-semibold">Resources for "{topic.name}"</h2>
           <IconButton icon={X} label="Close" onClick={onClose} />
@@ -42,7 +42,7 @@ export function ResourceModal({ topic, onClose }: { topic: Topic; onClose: () =>
           {resources?.map((r) => (
             <div
               key={r.id}
-              className="flex items-start justify-between gap-2 rounded-lg border border-neutral-200 p-2 text-sm dark:border-neutral-800"
+              className="flex items-start justify-between gap-2 rounded-md border border-neutral-200 p-2 text-sm dark:border-neutral-800"
             >
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5 font-medium">
@@ -56,7 +56,7 @@ export function ResourceModal({ topic, onClose }: { topic: Topic; onClose: () =>
                       href={r.url ?? "#"}
                       target="_blank"
                       rel="noreferrer"
-                      className="flex min-w-0 items-center gap-1 truncate text-blue-600 hover:underline dark:text-blue-400"
+                      className="flex min-w-0 items-center gap-1 truncate text-accent-600 hover:underline dark:text-accent-400"
                     >
                       <span className="truncate">{r.title}</span>
                       <ExternalLink className="h-3 w-3 shrink-0" />

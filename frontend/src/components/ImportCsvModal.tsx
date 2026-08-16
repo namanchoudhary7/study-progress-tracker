@@ -40,7 +40,7 @@ export function ImportCsvModal({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-      <div className="w-full max-w-lg rounded-lg border border-neutral-200 bg-white p-4 shadow-xl dark:border-neutral-800 dark:bg-neutral-900">
+      <div className="relative w-full max-w-lg rounded-md border border-neutral-200 bg-white p-4 shadow-xl before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-accent-500/60 before:to-transparent dark:border-neutral-800 dark:bg-neutral-900">
         <div className="mb-3 flex items-center justify-between">
           <h2 className="font-semibold">Import from CSV</h2>
           <IconButton icon={X} label="Close" onClick={onClose} />
@@ -71,7 +71,7 @@ export function ImportCsvModal({ onClose }: { onClose: () => void }) {
             )}
 
             {preview && preview.headers.length > 0 && (
-              <div className="mt-3 max-h-64 overflow-auto rounded-lg border border-neutral-200 dark:border-neutral-800">
+              <div className="mt-3 max-h-64 overflow-auto rounded-md border border-neutral-200 dark:border-neutral-800">
                 <table className="w-full text-left text-xs">
                   <thead className="bg-neutral-50 dark:bg-neutral-800">
                     <tr>
@@ -113,10 +113,10 @@ export function ImportCsvModal({ onClose }: { onClose: () => void }) {
               <span className="font-medium">Import complete</span>
             </div>
             <ul className="text-sm text-neutral-600 dark:text-neutral-400">
-              <li>{result.rows_processed} row(s) processed</li>
-              <li>{result.subjects_created} new subject(s) created</li>
-              <li>{result.topics_created} new topic(s) created</li>
-              <li>{result.topics_skipped} topic(s) skipped (already existed)</li>
+              <li><span className="font-mono tabular-nums">{result.rows_processed}</span> row(s) processed</li>
+              <li><span className="font-mono tabular-nums">{result.subjects_created}</span> new subject(s) created</li>
+              <li><span className="font-mono tabular-nums">{result.topics_created}</span> new topic(s) created</li>
+              <li><span className="font-mono tabular-nums">{result.topics_skipped}</span> topic(s) skipped (already existed)</li>
             </ul>
             <div className="flex justify-end">
               <Button variant="primary" onClick={onClose}>Done</Button>

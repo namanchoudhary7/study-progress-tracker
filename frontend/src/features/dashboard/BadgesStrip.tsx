@@ -21,7 +21,7 @@ export function BadgesStrip() {
           <div
             key={badge.key}
             title={`${badge.description} (${badge.current}/${badge.target})`}
-            className={`flex flex-col items-center gap-1 rounded-lg border px-3 py-2 text-center ${
+            className={`flex flex-col items-center gap-1 rounded-md border px-3 py-2 text-center ${
               badge.earned
                 ? "border-amber-300 bg-amber-50 dark:border-amber-700 dark:bg-amber-950/40"
                 : "border-neutral-200 bg-neutral-50 opacity-50 dark:border-neutral-800 dark:bg-neutral-900"
@@ -32,7 +32,7 @@ export function BadgesStrip() {
             />
             <span className="text-xs font-medium">{badge.label}</span>
             {!badge.earned && (
-              <span className="text-[10px] text-neutral-500">
+              <span className="font-mono text-[10px] tabular-nums text-neutral-500">
                 {badge.current}/{badge.target}
               </span>
             )}

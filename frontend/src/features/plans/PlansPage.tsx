@@ -108,9 +108,9 @@ export function PlansPage() {
                 key={d.bit}
                 type="button"
                 onClick={() => toggleDay(d.bit)}
-                className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
                   daysMask & d.bit
-                    ? "bg-blue-600 text-white"
+                    ? "bg-accent-600 text-white"
                     : "border border-neutral-300 text-neutral-600 hover:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-400 dark:hover:bg-neutral-800"
                 }`}
               >

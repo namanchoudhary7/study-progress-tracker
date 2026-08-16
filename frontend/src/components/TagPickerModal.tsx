@@ -43,7 +43,7 @@ export function TagPickerModal({ topic, onClose }: { topic: Topic; onClose: () =
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-      <div className="w-full max-w-sm rounded-lg border border-neutral-200 bg-white p-4 shadow-xl dark:border-neutral-800 dark:bg-neutral-900">
+      <div className="relative w-full max-w-sm rounded-md border border-neutral-200 bg-white p-4 shadow-xl before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-accent-500/60 before:to-transparent dark:border-neutral-800 dark:bg-neutral-900">
         <div className="mb-3 flex items-center justify-between">
           <h2 className="font-semibold">Tags for "{topic.name}"</h2>
           <IconButton icon={X} label="Close" onClick={onClose} />
@@ -58,7 +58,7 @@ export function TagPickerModal({ topic, onClose }: { topic: Topic; onClose: () =
               <button
                 key={tag.id}
                 onClick={() => toggle(tag.id)}
-                className="rounded-full px-2.5 py-1 text-xs font-medium transition-colors"
+                className="rounded-md px-2.5 py-1 text-xs font-medium transition-colors"
                 style={
                   active
                     ? { backgroundColor: color, color: "#fff" }
@@ -80,7 +80,7 @@ export function TagPickerModal({ topic, onClose }: { topic: Topic; onClose: () =
             type="color"
             value={newTagColor}
             onChange={(e) => setNewTagColor(e.target.value)}
-            className="h-8 w-8 shrink-0 cursor-pointer rounded-lg border border-neutral-300 dark:border-neutral-700"
+            className="h-8 w-8 shrink-0 cursor-pointer rounded-md border border-neutral-300 dark:border-neutral-700"
             title="Tag color"
           />
           <Input

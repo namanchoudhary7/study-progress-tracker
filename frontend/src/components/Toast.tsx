@@ -56,12 +56,12 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         {toasts.map((t) => (
           <div
             key={t.id}
-            className="flex items-center gap-3 rounded-lg border border-neutral-200 bg-white px-4 py-2.5 text-sm shadow-lg dark:border-neutral-700 dark:bg-neutral-800"
+            className="flex items-center gap-3 rounded-md border border-neutral-200 bg-white px-4 py-2.5 text-sm shadow-lg dark:border-neutral-700 dark:bg-neutral-800"
           >
             <span>{t.message}</span>
             <button
               onClick={() => handleUndo(t.id)}
-              className="font-medium text-blue-600 hover:underline dark:text-blue-400"
+              className="font-medium text-accent-600 hover:underline dark:text-accent-400"
             >
               Undo
             </button>

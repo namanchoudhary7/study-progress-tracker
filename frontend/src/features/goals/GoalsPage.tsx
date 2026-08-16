@@ -123,13 +123,13 @@ export function GoalsPage() {
 
       {!isError && overdue.length > 0 && (
         <div className="space-y-2">
-          <h2 className="text-sm font-medium text-red-600 dark:text-red-400">Overdue</h2>
+          <h2 className="font-mono-label text-red-600 dark:text-red-400">Overdue</h2>
           {overdue.map((g) => <GoalRow key={g.id} goal={g} />)}
         </div>
       )}
 
       <div className="space-y-2">
-        <h2 className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Open</h2>
+        <h2 className="font-mono-label text-neutral-500 dark:text-neutral-400">Open</h2>
         {open.length === 0 && !isLoading && (
           <div className="flex flex-col items-center gap-2 py-6 text-center text-sm text-neutral-500">
             <Target className="h-6 w-6 text-neutral-300 dark:text-neutral-700" />
@@ -140,7 +140,7 @@ export function GoalsPage() {
       </div>
 
       <div className="space-y-2">
-        <h2 className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Completed</h2>
+        <h2 className="font-mono-label text-neutral-500 dark:text-neutral-400">Completed</h2>
         {completed.length === 0 && <p className="text-sm text-neutral-500">No completed goals yet.</p>}
         {completed.map((g) => <GoalRow key={g.id} goal={g} />)}
       </div>

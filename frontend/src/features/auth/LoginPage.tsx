@@ -64,12 +64,12 @@ export function LoginPage() {
         </form>
         <a
           href={authApi.googleLoginUrl}
-          className="mt-3 block w-full rounded-lg border border-neutral-300 px-3 py-1.5 text-center text-sm text-neutral-700 hover:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800"
+          className="mt-3 block w-full rounded-md border border-neutral-300 px-3 py-1.5 text-center text-sm text-neutral-700 hover:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800"
         >
           Sign in with Google
         </a>
         <p className="mt-4 text-center text-sm text-neutral-500">
-          No account? <Link to="/signup" className="text-blue-600 hover:underline dark:text-blue-400">Sign up</Link>
+          No account? <Link to="/signup" className="text-accent-600 hover:underline dark:text-accent-400">Sign up</Link>
         </p>
       </Card>
     </div>

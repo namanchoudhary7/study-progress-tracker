@@ -51,8 +51,8 @@ export function StreakHeatmap() {
     <div className="viz-root">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <p className="text-sm text-neutral-600 dark:text-neutral-400">
-          <span className="font-semibold text-neutral-900 dark:text-neutral-100">{totalMinutes} min</span> studied
-          over <span className="font-semibold text-neutral-900 dark:text-neutral-100">{activeDays}</span> active day
+          <span className="font-mono font-semibold tabular-nums text-neutral-900 dark:text-neutral-100">{totalMinutes} min</span> studied
+          over <span className="font-mono font-semibold tabular-nums text-neutral-900 dark:text-neutral-100">{activeDays}</span> active day
           {activeDays === 1 ? "" : "s"} in {selectedYear}
         </p>
         {years && years.length > 1 && (

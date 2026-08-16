@@ -46,33 +46,33 @@ export function SharePage() {
   return (
     <div className="mx-auto max-w-2xl space-y-6 px-4 py-10">
       <div className="flex items-center gap-2">
-        <BookOpen className="h-6 w-6 text-blue-600" />
+        <BookOpen className="h-6 w-6 text-accent-600" />
         <h1 className="text-xl font-semibold">{name}'s study progress</h1>
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Card className="text-center">
-          <p className="text-2xl font-semibold">{profile.overview.total_subjects}</p>
+          <p className="font-mono text-2xl font-semibold tabular-nums">{profile.overview.total_subjects}</p>
           <p className="text-xs text-neutral-500">Subjects</p>
         </Card>
         <Card className="text-center">
-          <p className="text-2xl font-semibold">
+          <p className="font-mono text-2xl font-semibold tabular-nums">
             {profile.overview.topics_done}/{profile.overview.total_topics}
           </p>
           <p className="text-xs text-neutral-500">{profile.overview.completion_pct}% complete</p>
         </Card>
         <Card className="text-center">
-          <p className="text-2xl font-semibold">{profile.overview.total_minutes}</p>
+          <p className="font-mono text-2xl font-semibold tabular-nums">{profile.overview.total_minutes}</p>
           <p className="text-xs text-neutral-500">Minutes studied</p>
         </Card>
         <Card className="text-center">
-          <p className="text-2xl font-semibold">{profile.streaks.current_streak}</p>
+          <p className="font-mono text-2xl font-semibold tabular-nums">{profile.streaks.current_streak}</p>
           <p className="text-xs text-neutral-500">Day streak (best {profile.streaks.longest_streak})</p>
         </Card>
       </div>
 
       <Card>
-        <h2 className="mb-2 text-sm font-medium text-neutral-700 dark:text-neutral-300">Badges</h2>
+        <h2 className="mb-2 font-mono-label text-neutral-500 dark:text-neutral-400">Badges</h2>
         <div className="flex flex-wrap gap-3">
           {profile.badges.map((badge) => {
             const Icon = ICONS[badge.icon] ?? CheckSquare;
@@ -80,7 +80,7 @@ export function SharePage() {
               <div
                 key={badge.key}
                 title={badge.description}
-                className={`flex flex-col items-center gap-1 rounded-lg border px-3 py-2 text-center ${
+                className={`flex flex-col items-center gap-1 rounded-md border px-3 py-2 text-center ${
                   badge.earned
                     ? "border-amber-300 bg-amber-50 dark:border-amber-700 dark:bg-amber-950/40"
                     : "border-neutral-200 bg-neutral-50 opacity-50 dark:border-neutral-800 dark:bg-neutral-900"

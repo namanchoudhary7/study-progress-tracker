@@ -250,7 +250,7 @@ export function SubjectDetailPage() {
               <button
                 key={tag.id}
                 onClick={() => toggleFilterTag(tag.id)}
-                className="rounded-full px-2.5 py-1 text-xs font-medium transition-colors"
+                className="rounded-md px-2.5 py-1 text-xs font-medium transition-colors"
                 style={active ? { backgroundColor: color, color: "#fff" } : { boxShadow: `inset 0 0 0 1px ${color}`, color }}
               >
                 {tag.name}

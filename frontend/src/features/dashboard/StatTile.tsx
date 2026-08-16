@@ -14,12 +14,12 @@ export function StatTile({
 }) {
   return (
     <Card className="flex items-start gap-3">
-      <div className="rounded-lg bg-blue-50 p-2 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400">
+      <div className="rounded-md border border-accent-500/30 bg-accent-500/10 p-2 text-accent-600 dark:text-accent-400">
         <Icon className="h-5 w-5" />
       </div>
       <div>
-        <p className="text-sm text-neutral-500">{label}</p>
-        <p className="mt-1 text-2xl font-semibold tabular-nums">{value}</p>
+        <p className="font-mono-label text-xs text-neutral-500">{label}</p>
+        <p className="mt-1 font-mono text-2xl font-semibold tabular-nums">{value}</p>
         {sub && <p className="mt-1 text-xs text-neutral-500">{sub}</p>}
       </div>
     </Card>

@@ -30,7 +30,7 @@ function SessionRow({ session, subjectName }: { session: StudySession; subjectNa
       <div className="flex items-center justify-between">
         <span>{session.session_date} · {subjectName}</span>
         <div className="flex items-center gap-2">
-          <span className="text-neutral-500">{session.duration_minutes} min</span>
+          <span className="font-mono tabular-nums text-neutral-500">{session.duration_minutes} min</span>
           <Button size="sm" onClick={() => setEditing((e) => !e)}>
             {editing ? "Close" : session.notes ? "Edit note" : "Add note"}
           </Button>
@@ -85,7 +85,7 @@ export function SessionsPage() {
       <TimerWidget />
 
       <Card>
-        <h2 className="mb-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">Log a session manually</h2>
+        <h2 className="mb-3 font-mono-label text-neutral-500 dark:text-neutral-400">Log a session manually</h2>
         <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-3 sm:grid-cols-5">
           <Select
             value={subjectId}

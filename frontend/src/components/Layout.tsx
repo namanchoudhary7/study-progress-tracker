@@ -90,10 +90,10 @@ export function Layout() {
             to={item.to}
             onClick={() => setMobileOpen(false)}
             className={({ isActive }) =>
-              `flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+              `group flex items-center gap-3 rounded-md border-l-2 px-3 py-2 font-mono text-sm font-medium transition-colors ${
                 isActive
-                  ? "bg-blue-600 text-white"
-                  : "text-neutral-600 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-800"
+                  ? "border-accent-500 bg-accent-500/10 text-accent-700 dark:text-accent-300"
+                  : "border-transparent text-neutral-600 hover:border-neutral-300 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:border-neutral-700 dark:hover:bg-neutral-800/60"
               }`
             }
           >
@@ -110,7 +110,9 @@ export function Layout() {
         </div>
         {user && (
           <div className="truncate px-2" title={user.email}>
-            <p className="truncate text-sm font-medium text-neutral-900 dark:text-neutral-100">{user.username}</p>
+            <p className="truncate font-mono text-sm font-medium text-neutral-900 dark:text-neutral-100">
+              {user.username}
+            </p>
             <p className="truncate text-xs text-neutral-500">{user.email}</p>
           </div>
         )}
@@ -119,8 +121,8 @@ export function Layout() {
   );
 
   return (
-    <div className="flex min-h-screen bg-neutral-50 text-neutral-900 dark:bg-neutral-950 dark:text-neutral-100">
-      <aside className="hidden w-56 flex-col border-r border-neutral-200 bg-white sm:flex dark:border-neutral-800 dark:bg-neutral-900">
+    <div className="flex min-h-screen text-neutral-900 dark:text-neutral-100">
+      <aside className="hidden w-56 flex-col border-r border-neutral-200 bg-white/90 backdrop-blur-sm sm:flex dark:border-neutral-800 dark:bg-neutral-900/80">
         {sidebarContent}
       </aside>
 
@@ -134,16 +136,26 @@ export function Layout() {
       )}
 
       <div className="flex flex-1 flex-col">
-        <header className="flex items-center gap-3 border-b border-neutral-200 px-4 py-3 dark:border-neutral-800 sm:px-6">
+        <header className="flex items-center gap-3 border-b border-neutral-200 bg-white/70 px-4 py-3 backdrop-blur-sm dark:border-neutral-800 dark:bg-neutral-950/60 sm:px-6">
           <button
             onClick={() => setMobileOpen(true)}
-            className="rounded-lg p-1.5 hover:bg-neutral-100 dark:hover:bg-neutral-800 sm:hidden"
+            className="rounded-md p-1.5 hover:bg-neutral-100 dark:hover:bg-neutral-800 sm:hidden"
             aria-label="Open menu"
           >
             <Menu className="h-5 w-5" />
           </button>
-          {currentTitle && <h1 className="text-lg font-semibold">{currentTitle}</h1>}
-          {lastSynced && <span className="ml-auto text-xs text-neutral-500">Updated {lastSynced}</span>}
+          {currentTitle && (
+            <h1 className="font-mono-label text-sm text-neutral-500 dark:text-neutral-400">
+              <span className="text-accent-600 dark:text-accent-400">~/</span>
+              {currentTitle}
+            </h1>
+          )}
+          {lastSynced && (
+            <span className="ml-auto flex items-center gap-1.5 font-mono text-xs text-neutral-500">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.8)]" />
+              synced {lastSynced}
+            </span>
+          )}
         </header>
         {showVerifyBanner && (
           <div className="flex flex-wrap items-center gap-3 border-b border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-300 sm:px-6">

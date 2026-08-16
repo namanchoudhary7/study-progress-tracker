@@ -29,7 +29,7 @@ export function TaskPickerModal({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-      <div className="w-full max-w-md rounded-lg border border-neutral-200 bg-white p-4 shadow-xl dark:border-neutral-800 dark:bg-neutral-900">
+      <div className="relative w-full max-w-md rounded-md border border-neutral-200 bg-white p-4 shadow-xl before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-accent-500/60 before:to-transparent dark:border-neutral-800 dark:bg-neutral-900">
         <div className="mb-3 flex items-center justify-between">
           <h2 className="font-semibold">Pick a task to start</h2>
           <IconButton icon={X} label="Close" onClick={onClose} />
@@ -72,16 +72,16 @@ export function TaskPickerModal({ onClose }: { onClose: () => void }) {
 
         {todayPlans && todayPlans.length > 0 && (
           <div className="mb-3 space-y-1 border-b border-neutral-200 pb-3 dark:border-neutral-800">
-            <p className="flex items-center gap-1 text-xs font-medium text-neutral-500">
+            <p className="flex items-center gap-1 font-mono-label text-neutral-500 dark:text-neutral-400">
               <CalendarDays className="h-3.5 w-3.5" /> Today's plan
             </p>
             {todayPlans.map((plan) => (
               <button
                 key={plan.id}
                 onClick={() => handlePick(plan.topic_id, plan.topic_name, plan.subject_id)}
-                className="flex w-full items-center gap-2 rounded-lg bg-blue-50 px-3 py-2 text-left text-sm hover:bg-blue-100 dark:bg-blue-950/30 dark:hover:bg-blue-950/50"
+                className="flex w-full items-center gap-2 rounded-md bg-accent-50 px-3 py-2 text-left text-sm hover:bg-accent-100 dark:bg-accent-950/30 dark:hover:bg-accent-950/50"
               >
-                <CalendarDays className="h-3.5 w-3.5 shrink-0 text-blue-600 dark:text-blue-400" />
+                <CalendarDays className="h-3.5 w-3.5 shrink-0 text-accent-600 dark:text-accent-400" />
                 <span className="flex-1">
                   <span className="font-medium">{plan.topic_name ?? plan.subject_name}</span>
                   {plan.topic_name && <span className="text-neutral-500"> · {plan.subject_name}</span>}
@@ -105,11 +105,11 @@ export function TaskPickerModal({ onClose }: { onClose: () => void }) {
             <button
               key={topic.id}
               onClick={() => handlePick(topic.id, topic.name, topic.subject_id)}
-              className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm hover:bg-neutral-100 dark:hover:bg-neutral-800"
+              className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm hover:bg-neutral-100 dark:hover:bg-neutral-800"
             >
               <CircleDot
                 className={`h-3.5 w-3.5 shrink-0 ${
-                  topic.status === "in_progress" ? "text-blue-600 dark:text-blue-400" : "text-neutral-400"
+                  topic.status === "in_progress" ? "text-accent-600 dark:text-accent-400" : "text-neutral-400"
                 }`}
               />
               <span className="flex-1">

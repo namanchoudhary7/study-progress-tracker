@@ -31,7 +31,7 @@ export function VerifyEmailPage() {
             <CheckCircle2 className="h-8 w-8 text-green-600 dark:text-green-400" />
             <h1 className="text-lg font-semibold">Email verified</h1>
             <p className="text-sm text-neutral-500">Your email address has been verified.</p>
-            <Link to="/dashboard" className="mt-2 text-sm text-blue-600 hover:underline dark:text-blue-400">
+            <Link to="/dashboard" className="mt-2 text-sm text-accent-600 hover:underline dark:text-accent-400">
               Go to dashboard
             </Link>
           </div>
@@ -41,7 +41,7 @@ export function VerifyEmailPage() {
             <XCircle className="h-8 w-8 text-red-600 dark:text-red-400" />
             <h1 className="text-lg font-semibold">Invalid or expired link</h1>
             <p className="text-sm text-neutral-500">Sign in and use "Resend email" to get a new link.</p>
-            <Link to="/login" className="mt-2 text-sm text-blue-600 hover:underline dark:text-blue-400">
+            <Link to="/login" className="mt-2 text-sm text-accent-600 hover:underline dark:text-accent-400">
               Go to login
             </Link>
           </div>

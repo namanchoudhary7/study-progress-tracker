@@ -68,7 +68,7 @@ function SubjectRow({ subject }: { subject: Subject }) {
               type="color"
               value={color}
               onChange={(e) => setColor(e.target.value)}
-              className="h-8 w-8 cursor-pointer rounded-lg border border-neutral-300 dark:border-neutral-700"
+              className="h-8 w-8 cursor-pointer rounded-md border border-neutral-300 dark:border-neutral-700"
             />
             <Input value={name} onChange={(e) => setName(e.target.value)} />
             <Input
@@ -144,7 +144,7 @@ function SubjectRow({ subject }: { subject: Subject }) {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-sm text-neutral-500">
+          <span className="font-mono text-sm tabular-nums text-neutral-500">
             {done}/{total} topics ({pct}%)
           </span>
           <IconButton icon={Pencil} label="Edit subject" onClick={() => setEditing(true)} />

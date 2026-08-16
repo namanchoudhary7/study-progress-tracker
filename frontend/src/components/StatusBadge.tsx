@@ -2,15 +2,17 @@ import type { TopicStatus, GoalStatus } from "../api/types";
 import { Badge } from "./ui/Badge";
 
 const topicStyles: Record<TopicStatus, string> = {
-  todo: "bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300",
-  in_progress: "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300",
-  done: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300",
+  todo: "border-neutral-300 bg-neutral-100 text-neutral-700 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300",
+  in_progress:
+    "border-amber-300 bg-amber-100 text-amber-800 dark:border-amber-800 dark:bg-amber-900/40 dark:text-amber-300",
+  done: "border-emerald-300 bg-emerald-100 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300",
 };
 
 const goalStyles: Record<GoalStatus, string> = {
-  open: "bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300",
-  completed: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300",
-  missed: "bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300",
+  open: "border-accent-300 bg-accent-100 text-accent-800 dark:border-accent-800 dark:bg-accent-900/40 dark:text-accent-300",
+  completed:
+    "border-emerald-300 bg-emerald-100 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300",
+  missed: "border-red-300 bg-red-100 text-red-800 dark:border-red-800 dark:bg-red-900/40 dark:text-red-300",
 };
 
 export function TopicStatusBadge({ status }: { status: TopicStatus }) {
