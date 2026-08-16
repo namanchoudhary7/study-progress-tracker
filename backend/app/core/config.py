@@ -31,6 +31,9 @@ class Settings(BaseSettings):
     # current access level — Lite variants are the only ones that actually respond.
     gemini_model_priority: str = "gemini-3.5-flash-lite,gemini-2.5-flash-lite"
 
+    agent_rate_limit_per_minute: int = 20
+    agent_rate_limit_per_day: int = 200
+
     @property
     def llm_provider_priority_list(self) -> list[str]:
         return [p.strip() for p in self.llm_provider_priority.split(",") if p.strip()]

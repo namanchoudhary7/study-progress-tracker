@@ -13,6 +13,7 @@ from app.routers import (
     api_keys,
     auth,
     export,
+    flashcards,
     goals,
     import_,
     internal,
@@ -74,6 +75,7 @@ app.include_router(export.router, prefix=API_PREFIX)
 app.include_router(users.router, prefix=API_PREFIX)
 app.include_router(tags.router, prefix=API_PREFIX)
 app.include_router(resources.router, prefix=API_PREFIX)
+app.include_router(flashcards.router, prefix=API_PREFIX)
 app.include_router(public.router, prefix=API_PREFIX)
 app.include_router(internal.router, prefix=API_PREFIX)
 app.include_router(plans.router, prefix=API_PREFIX)

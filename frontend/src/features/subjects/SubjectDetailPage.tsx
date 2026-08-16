@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
-import { BookOpen, ListChecks, Pencil, Plus, Tag as TagIcon, Trash2 } from "lucide-react";
+import { BookOpen, Layers, ListChecks, Pencil, Plus, Tag as TagIcon, Trash2 } from "lucide-react";
 import { Card } from "../../components/Card";
+import { FlashcardModal } from "../../components/FlashcardModal";
 import { ResourceModal } from "../../components/ResourceModal";
 import { TopicStatusBadge } from "../../components/StatusBadge";
 import { TagPickerModal } from "../../components/TagPickerModal";
@@ -37,6 +38,7 @@ function TopicRow({ topic, depth = 0 }: { topic: Topic; depth?: number }) {
   const [editing, setEditing] = useState(false);
   const [tagPickerOpen, setTagPickerOpen] = useState(false);
   const [resourcesOpen, setResourcesOpen] = useState(false);
+  const [flashcardsOpen, setFlashcardsOpen] = useState(false);
   const [addingChild, setAddingChild] = useState(false);
   const [childName, setChildName] = useState("");
   const [name, setName] = useState(topic.name);
@@ -132,11 +134,13 @@ function TopicRow({ topic, depth = 0 }: { topic: Topic; depth?: number }) {
         <IconButton icon={Plus} label="Add sub-topic" onClick={() => setAddingChild(true)} />
         <IconButton icon={TagIcon} label="Manage tags" onClick={() => setTagPickerOpen(true)} />
         <IconButton icon={BookOpen} label="Manage resources" onClick={() => setResourcesOpen(true)} />
+        <IconButton icon={Layers} label="Manage flashcards" onClick={() => setFlashcardsOpen(true)} />
         <IconButton icon={Pencil} label="Edit topic" onClick={() => setEditing(true)} />
         <IconButton icon={Trash2} label="Delete topic" variant="danger" onClick={handleDelete} />
       </div>
       {tagPickerOpen && <TagPickerModal topic={topic} onClose={() => setTagPickerOpen(false)} />}
       {resourcesOpen && <ResourceModal topic={topic} onClose={() => setResourcesOpen(false)} />}
+      {flashcardsOpen && <FlashcardModal topic={topic} onClose={() => setFlashcardsOpen(false)} />}
     </Card>
   );
 }

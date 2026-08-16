@@ -11,6 +11,7 @@ export type AgentStreamEvent =
   | { type: "delta"; text: string }
   | { type: "tool_call"; name: string; arguments: Record<string, unknown> }
   | { type: "tool_result"; name: string; result: unknown }
+  | { type: "confirm_required"; token: string; name: string; arguments: Record<string, unknown> }
   | { type: "done"; text: string; model?: string }
   | { type: "error"; message: string };
 
@@ -27,19 +28,29 @@ function parseFrame(frame: string): AgentStreamEvent | null {
   return { type: event, ...parsed } as AgentStreamEvent;
 }
 
-export async function streamChat(messages: ChatMessage[], onEvent: (event: AgentStreamEvent) => void): Promise<void> {
+async function streamSSE(
+  path: string,
+  body: unknown,
+  onEvent: (event: AgentStreamEvent) => void
+): Promise<void> {
   const headers: Record<string, string> = { "Content-Type": "application/json" };
   const csrfToken = getCsrfToken();
   if (csrfToken) headers["X-CSRF-Token"] = csrfToken;
 
-  const res = await fetch(`${API_URL}/agent/chat`, {
+  const res = await fetch(`${API_URL}${path}`, {
     method: "POST",
     credentials: "include",
     headers,
-    body: JSON.stringify({ messages }),
+    body: JSON.stringify(body),
   });
   if (!res.ok || !res.body) {
-    throw new Error(`${res.status} ${res.statusText}`);
+    if (res.status === 429) {
+      const retryAfter = res.headers.get("Retry-After");
+      const wait = retryAfter ? ` Try again in ${retryAfter}s.` : "";
+      throw new Error(`You're sending messages too quickly.${wait}`);
+    }
+    const body = await res.json().catch(() => null);
+    throw new Error(body?.detail || `${res.status} ${res.statusText}`);
   }
 
   const reader = res.body.getReader();
@@ -57,4 +68,17 @@ export async function streamChat(messages: ChatMessage[], onEvent: (event: Agent
       if (event) onEvent(event);
     }
   }
+}
+
+export function streamChat(messages: ChatMessage[], onEvent: (event: AgentStreamEvent) => void): Promise<void> {
+  return streamSSE("/agent/chat", { messages }, onEvent);
+}
+
+/** Resumes a paused agent turn after the user approves or declines a destructive tool call. */
+export function confirmToolCall(
+  token: string,
+  approved: boolean,
+  onEvent: (event: AgentStreamEvent) => void
+): Promise<void> {
+  return streamSSE("/agent/confirm", { token, approved }, onEvent);
 }

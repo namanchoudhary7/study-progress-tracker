@@ -10,8 +10,9 @@ from typing import Any, Callable
 
 from sqlalchemy.orm import Session
 
-from app.agent_tools import goals, plans, reviews, sessions, stats, subjects, tags, topics
+from app.agent_tools import flashcards, goals, plans, reviews, sessions, stats, subjects, tags, topics
 from app.models.user import User
+from app.schemas.flashcard import FlashcardRead
 from app.schemas.goal import GoalRead
 from app.schemas.recurring_plan import RecurringPlanRead, TodayPlanItem
 from app.schemas.review import DueReviewItem, ReviewScheduleRead, TopicReviewDetail
@@ -319,6 +320,46 @@ TOOLS: list[Tool] = [
         },
         reviews.complete_review,
         _one(ReviewScheduleRead),
+    ),
+    # --- flashcards ---
+    Tool(
+        "list_flashcards",
+        "List flashcards (practice question/answer pairs) saved for a topic.",
+        {"type": "object", "properties": {"topic_id": {"type": "integer"}}, "required": ["topic_id"]},
+        flashcards.list_flashcards,
+        _many(FlashcardRead),
+    ),
+    Tool(
+        "create_flashcards",
+        "Create one or more flashcards (question/answer pairs) for a topic — use this to save AI-generated "
+        "practice questions so the user can review them later, instead of only stating them in the chat reply.",
+        {
+            "type": "object",
+            "properties": {
+                "topic_id": {"type": "integer"},
+                "cards": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "question": {"type": "string"},
+                            "answer": {"type": "string"},
+                        },
+                        "required": ["question", "answer"],
+                    },
+                },
+            },
+            "required": ["topic_id", "cards"],
+        },
+        flashcards.create_flashcards,
+        _many(FlashcardRead),
+    ),
+    Tool(
+        "delete_flashcard",
+        "Delete a flashcard.",
+        {"type": "object", "properties": {"flashcard_id": {"type": "integer"}}, "required": ["flashcard_id"]},
+        flashcards.delete_flashcard,
+        lambda _: {"deleted": True},
     ),
     # --- tags ---
     Tool("list_tags", "List all of the user's tags.", {"type": "object", "properties": {}}, tags.list_tags, _many(TagRead)),

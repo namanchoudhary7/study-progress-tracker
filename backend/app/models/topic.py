@@ -40,3 +40,4 @@ class Topic(Base, TimestampMixin):
     review_logs: Mapped[list["ReviewLog"]] = relationship(back_populates="topic", cascade="all, delete-orphan")
     tags: Mapped[list["Tag"]] = relationship(secondary=topic_tags, back_populates="topics")
     resources: Mapped[list["Resource"]] = relationship(back_populates="topic", cascade="all, delete-orphan")
+    flashcards: Mapped[list["Flashcard"]] = relationship(back_populates="topic", cascade="all, delete-orphan")

@@ -4,11 +4,19 @@ import { Card } from "../../components/Card";
 import { ErrorBanner } from "../../components/ErrorBanner";
 import { Button } from "../../components/ui/Button";
 import { Textarea } from "../../components/ui/Textarea";
-import { streamChat, type ChatMessage } from "../../api/agent";
+import { streamChat, confirmToolCall, type AgentStreamEvent, type ChatMessage } from "../../api/agent";
+
+interface PendingConfirmation {
+  token: string;
+  name: string;
+  arguments: Record<string, unknown>;
+  resolved?: "approved" | "declined";
+}
 
 interface DisplayMessage extends ChatMessage {
   toolCalls?: string[];
   model?: string;
+  confirmation?: PendingConfirmation;
 }
 
 const SUGGESTIONS = [
@@ -18,6 +26,14 @@ const SUGGESTIONS = [
   "Help me plan for an exam in two weeks",
 ];
 
+const CONFIRM_LABELS: Record<string, string> = {
+  delete_subject: "Delete this subject, along with all its topics, sessions, and goals?",
+  delete_topic: "Delete this topic?",
+  delete_session: "Delete this logged study session?",
+  delete_goal: "Delete this goal?",
+  delete_flashcard: "Delete this flashcard?",
+};
+
 export function AgentPage() {
   const [messages, setMessages] = useState<DisplayMessage[]>([]);
   const [input, setInput] = useState("");
@@ -25,13 +41,37 @@ export function AgentPage() {
   const [error, setError] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
+  const lastMessage = messages[messages.length - 1];
+  const awaitingConfirmation = !!lastMessage?.confirmation && !lastMessage.confirmation.resolved;
+
   function scrollToBottom() {
     requestAnimationFrame(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }));
   }
 
+  function applyEvent(event: AgentStreamEvent) {
+    setMessages((prev) => {
+      const next = [...prev];
+      const last = next[next.length - 1];
+      if (event.type === "delta") {
+        last.content += event.text;
+      } else if (event.type === "tool_call") {
+        last.toolCalls = [...(last.toolCalls ?? []), event.name];
+      } else if (event.type === "confirm_required") {
+        last.confirmation = { token: event.token, name: event.name, arguments: event.arguments };
+      } else if (event.type === "done") {
+        last.content = event.text || last.content;
+        last.model = event.model?.replace(/^gemini:/, "");
+      } else if (event.type === "error") {
+        setError(event.message);
+      }
+      return next;
+    });
+    scrollToBottom();
+  }
+
   async function send(text: string) {
     const question = text.trim();
-    if (!question || streaming) return;
+    if (!question || streaming || awaitingConfirmation) return;
 
     setError(null);
     setInput("");
@@ -41,24 +81,30 @@ export function AgentPage() {
     scrollToBottom();
 
     try {
-      await streamChat(history, (event) => {
-        setMessages((prev) => {
-          const next = [...prev];
-          const last = next[next.length - 1];
-          if (event.type === "delta") {
-            last.content += event.text;
-          } else if (event.type === "tool_call") {
-            last.toolCalls = [...(last.toolCalls ?? []), event.name];
-          } else if (event.type === "done") {
-            last.content = event.text || last.content;
-            last.model = event.model?.replace(/^gemini:/, "");
-          } else if (event.type === "error") {
-            setError(event.message);
-          }
-          return next;
-        });
-        scrollToBottom();
-      });
+      await streamChat(history, applyEvent);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong.");
+    } finally {
+      setStreaming(false);
+    }
+  }
+
+  async function respondToConfirmation(approved: boolean) {
+    if (!lastMessage?.confirmation || lastMessage.confirmation.resolved || streaming) return;
+    const { token } = lastMessage.confirmation;
+
+    setMessages((prev) => {
+      const next = [...prev];
+      const last = next[next.length - 1];
+      last.confirmation = { ...last.confirmation!, resolved: approved ? "approved" : "declined" };
+      return next;
+    });
+    setError(null);
+    setStreaming(true);
+    scrollToBottom();
+
+    try {
+      await confirmToolCall(token, approved, applyEvent);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
@@ -111,6 +157,27 @@ export function AgentPage() {
                 </div>
               )}
               {m.content || (streaming && i === messages.length - 1 ? "…" : "")}
+              {m.confirmation && (
+                <div className="mt-2 rounded-md border border-amber-300 bg-amber-50 p-2 text-xs dark:border-amber-800 dark:bg-amber-950/40">
+                  <p className="mb-2 text-amber-800 dark:text-amber-200">
+                    {CONFIRM_LABELS[m.confirmation.name] ?? `Confirm this action (${m.confirmation.name})?`}
+                  </p>
+                  {m.confirmation.resolved ? (
+                    <p className="text-amber-700 dark:text-amber-300">
+                      {m.confirmation.resolved === "approved" ? "Confirmed." : "Cancelled — nothing was deleted."}
+                    </p>
+                  ) : (
+                    <div className="flex gap-2">
+                      <Button size="sm" variant="primary" onClick={() => respondToConfirmation(true)} disabled={streaming}>
+                        Confirm
+                      </Button>
+                      <Button size="sm" variant="secondary" onClick={() => respondToConfirmation(false)} disabled={streaming}>
+                        Cancel
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
               {m.role === "assistant" && m.model && (
                 <div className="mt-1 text-[10px] text-neutral-400 dark:text-neutral-600">{m.model}</div>
               )}
@@ -126,7 +193,7 @@ export function AgentPage() {
         <Textarea
           className="flex-1 resize-none"
           rows={2}
-          placeholder="Ask your study coach…"
+          placeholder={awaitingConfirmation ? "Respond to the pending confirmation above…" : "Ask your study coach…"}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => {
@@ -136,7 +203,7 @@ export function AgentPage() {
             }
           }}
         />
-        <Button type="submit" variant="primary" icon={Send} disabled={streaming || !input.trim()}>
+        <Button type="submit" variant="primary" icon={Send} disabled={streaming || !input.trim() || awaitingConfirmation}>
           Send
         </Button>
       </form>
